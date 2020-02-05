@@ -66,6 +66,7 @@ func (lg *Logger) Info(v ...interface{}) {
 	args := []interface{}{prefix("info")}
 	args = append(args, v...)
 	fmt.Println(args...)
+	fmt.Fprintln(lg, args...)
 }
 
 func (lg *Logger) Error(v ...interface{}) {
