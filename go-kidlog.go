@@ -3,7 +3,7 @@ package go_kidlog
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/504dev/go-kidlog/types"
+	"github.com/504dev/kidlog/types"
 	"log"
 	"net"
 	"os"
