@@ -4,19 +4,22 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/504dev/kidlog/types"
+	"github.com/fatih/color"
 	"net"
 	"os"
 	"os/exec"
 	"regexp"
 	"runtime/debug"
+	"strconv"
 	"strings"
 	"time"
 )
 
 var commit = readCommit()
+var tag = readTag()
 var pid = os.Getpid()
 
-func caller() string {
+func initiator() string {
 	stack := string(debug.Stack())
 	caller := strings.TrimSpace(strings.Split(stack, "\n")[10])
 	splitted := regexp.MustCompile(`[\s\/]+`).Split(caller, 20)
@@ -25,19 +28,16 @@ func caller() string {
 	return caller
 }
 
-func prefix(level string) string {
-	dt := time.Now().Format(time.RFC3339)
-	return fmt.Sprintf("[KID] %v %v [%v, pid=%v, %v] ", dt, level, commit[:6], pid, caller())
-}
-
 func readCommit() string {
 	cmd := exec.Command("git", "rev-parse", "HEAD")
-	stdout, err := cmd.Output()
+	stdout, _ := cmd.Output()
 
-	if err != nil {
-		fmt.Fprintln(os.Stderr, err.Error())
-		return ""
-	}
+	return string(stdout)
+}
+
+func readTag() string {
+	cmd := exec.Command("git", "tag", "-l", "--points-at", "HEAD")
+	stdout, _ := cmd.Output()
 
 	return string(stdout)
 }
@@ -57,6 +57,8 @@ func (c *Config) Create(logname string) (*Logger, error) {
 	res := &Logger{
 		Config:  c,
 		Logname: logname,
+		Body:    "[{tag}, {commit}, pid={pid}, {initiator}] {message}",
+		Prefix:  "{time} {level}",
 		Conn:    conn,
 	}
 	return res, nil
@@ -65,40 +67,66 @@ func (c *Config) Create(logname string) (*Logger, error) {
 type Logger struct {
 	*Config
 	Logname string
+	Body    string
+	Prefix  string
 	net.Conn
 }
 
-func (lg *Logger) Format(level string, vals ...interface{}) string {
-	pfx := prefix(level)
+func (lg *Logger) prefix(level string) string {
+	dt := time.Now().Format(time.RFC3339)
+	flevel := level
+	switch level {
+	case "info":
+		flevel = color.New(color.FgGreen).SprintFunc()(level)
+	case "warn":
+		flevel = color.New(color.FgYellow).SprintFunc()(level)
+	case "error":
+		flevel = color.New(color.FgRed).SprintFunc()(level)
+	}
+	res := lg.Prefix
+	res = strings.Replace(res, "{time}", dt, -1)
+	res = strings.Replace(res, "{level}", flevel, -1)
+	return res
+}
+
+func (lg *Logger) body(msg string) string {
+	res := lg.Body
+	res = strings.Replace(res, "{tag}", tag, -1)
+	res = strings.Replace(res, "{commit}", commit[:6], -1)
+	res = strings.Replace(res, "{pid}", strconv.Itoa(pid), -1)
+	res = strings.Replace(res, "{initiator}", initiator(), -1)
+	res = strings.Replace(res, "{message}", msg, -1)
+	return res
+}
+
+func format(vals ...interface{}) string {
 	switch v := vals[0].(type) {
 	case string:
-		return fmt.Sprintf(pfx+v, vals[1:]...)
+		return fmt.Sprintf(v, vals[1:]...)
 	default:
-		args := []interface{}{pfx}
-		args = append(args, vals...)
-		return fmt.Sprint(args...)
+		return fmt.Sprint(vals...)
 	}
 }
 
 func (lg *Logger) Info(v ...interface{}) {
 	level := "info"
-	formatted := lg.Format(level, v...)
-	fmt.Fprintln(os.Stdout, formatted)
-	lg.WriteLevel(level, []byte(formatted))
+	msg := format(v...)
+	fmt.Fprintln(os.Stdout, lg.prefix(level)+lg.body(msg))
+	lg.WriteLevel(level, []byte(lg.body(msg)))
 }
 
 func (lg *Logger) Error(v ...interface{}) {
 	level := "error"
-	formatted := lg.Format(level, v...)
-	fmt.Fprintln(os.Stderr, formatted)
-	lg.WriteLevel(level, []byte(formatted))
+	msg := format(v...)
+	fmt.Fprintln(os.Stderr, lg.prefix(level)+lg.body(msg))
+	lg.WriteLevel(level, []byte(lg.body(msg)))
 }
 
 func (lg *Logger) Warn(v ...interface{}) {
 	level := "warn"
-	formatted := lg.Format(level, v...)
-	fmt.Fprintln(os.Stderr, formatted)
-	lg.WriteLevel(level, []byte(formatted))
+	msg := format(v...)
+	fmt.Fprintln(os.Stderr, lg.prefix(level)+lg.body(msg))
+	lg.WriteLevel(level, []byte(lg.body(msg)))
 }
 
 func (lg *Logger) Write(b []byte) (int, error) {
