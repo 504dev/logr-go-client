@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/504dev/kidlog/types"
-	"log"
 	"net"
 	"os"
 	"os/exec"
@@ -28,7 +27,7 @@ func caller() string {
 
 func prefix(level string) string {
 	dt := time.Now().Format(time.RFC3339)
-	return fmt.Sprintf("[KID] %v %v [%v, pid=%v, %v]", dt, level, commit[:6], pid, caller())
+	return fmt.Sprintf("[KID] %v %v [%v, pid=%v, %v] ", dt, level, commit[:6], pid, caller())
 }
 
 func readCommit() string {
@@ -36,7 +35,7 @@ func readCommit() string {
 	stdout, err := cmd.Output()
 
 	if err != nil {
-		log.Println(err.Error)
+		fmt.Fprintln(os.Stderr, err.Error())
 		return ""
 	}
 
@@ -50,42 +49,70 @@ type Config struct {
 	Hostname   string
 }
 
-func (c *Config) Create(logname string) *Logger {
-	return &Logger{
+func (c *Config) Create(logname string) (*Logger, error) {
+	conn, err := net.Dial("udp", "127.0.0.1:7776")
+	if err != nil {
+		return nil, err
+	}
+	res := &Logger{
 		Config:  c,
 		Logname: logname,
+		Conn:    conn,
 	}
+	return res, nil
 }
 
 type Logger struct {
 	*Config
 	Logname string
+	net.Conn
+}
+
+func (lg *Logger) Format(level string, vals ...interface{}) string {
+	pfx := prefix(level)
+	switch v := vals[0].(type) {
+	case string:
+		return fmt.Sprintf(pfx+v, vals[1:]...)
+	default:
+		args := []interface{}{pfx}
+		args = append(args, vals...)
+		return fmt.Sprint(args...)
+	}
 }
 
 func (lg *Logger) Info(v ...interface{}) {
-	args := []interface{}{prefix("info")}
-	args = append(args, v...)
-	fmt.Println(args...)
-	fmt.Fprintln(lg, args...)
+	level := "info"
+	formatted := lg.Format(level, v...)
+	fmt.Fprintln(os.Stdout, formatted)
+	lg.WriteLevel(level, []byte(formatted))
 }
 
 func (lg *Logger) Error(v ...interface{}) {
-	args := []interface{}{prefix("info")}
-	args = append(args, v...)
-	log.Println(args...)
+	level := "error"
+	formatted := lg.Format(level, v...)
+	fmt.Fprintln(os.Stderr, formatted)
+	lg.WriteLevel(level, []byte(formatted))
 }
 
-func (lg Logger) Write(b []byte) (int, error) {
-	conn, err := net.Dial("udp", "127.0.0.1:7776")
-	if err != nil {
-		return 0, err
-	}
+func (lg *Logger) Warn(v ...interface{}) {
+	level := "warn"
+	formatted := lg.Format(level, v...)
+	fmt.Fprintln(os.Stderr, formatted)
+	lg.WriteLevel(level, []byte(formatted))
+}
+
+func (lg *Logger) Write(b []byte) (int, error) {
+	return lg.WriteLevel("info", b)
+}
+
+func (lg *Logger) WriteLevel(level string, b []byte) (int, error) {
+
 	logitem := types.Log{
 		DashId:    0,
 		Timestamp: time.Now().UnixNano(),
 		Hostname:  lg.Config.Hostname,
 		Logname:   lg.Logname,
-		Level:     "info",
+		Level:     level,
 		Message:   string(b),
 	}
 	cipherText, err := logitem.Encrypt(lg.PrivateKey)
@@ -100,10 +127,9 @@ func (lg Logger) Write(b []byte) (int, error) {
 	if err != nil {
 		return 0, err
 	}
-	_, err = conn.Write(msg)
+	_, err = lg.Conn.Write(msg)
 	if err != nil {
 		return 0, err
 	}
-	conn.Close()
 	return len(b), nil
 }
