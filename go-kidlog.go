@@ -41,7 +41,10 @@ func readTag() string {
 	tmp := string(stdout)
 	parts := strings.Split(tmp, "\n")
 
-	return parts[len(parts)-2]
+	if len(parts) > 1 {
+		return parts[len(parts)-2]
+	}
+	return "-"
 }
 
 type Config struct {
