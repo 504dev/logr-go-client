@@ -38,8 +38,10 @@ func readCommit() string {
 func readTag() string {
 	cmd := exec.Command("git", "tag", "-l", "--points-at", "HEAD")
 	stdout, _ := cmd.Output()
+	tmp := string(stdout)
+	parts := strings.Split(tmp, "\n")
 
-	return string(stdout)
+	return parts[len(parts)-2]
 }
 
 type Config struct {
@@ -58,7 +60,7 @@ func (c *Config) Create(logname string) (*Logger, error) {
 		Config:  c,
 		Logname: logname,
 		Body:    "[{tag}, {commit}, pid={pid}, {initiator}] {message}",
-		Prefix:  "{time} {level}",
+		Prefix:  "{time} {level} ",
 		Conn:    conn,
 	}
 	return res, nil
@@ -112,28 +114,28 @@ func (lg *Logger) Info(v ...interface{}) {
 	level := "info"
 	msg := format(v...)
 	fmt.Fprintln(os.Stdout, lg.prefix(level)+lg.body(msg))
-	lg.WriteLevel(level, []byte(lg.body(msg)))
+	lg.writeLevel(level, []byte(lg.body(msg)))
 }
 
 func (lg *Logger) Error(v ...interface{}) {
 	level := "error"
 	msg := format(v...)
 	fmt.Fprintln(os.Stderr, lg.prefix(level)+lg.body(msg))
-	lg.WriteLevel(level, []byte(lg.body(msg)))
+	lg.writeLevel(level, []byte(lg.body(msg)))
 }
 
 func (lg *Logger) Warn(v ...interface{}) {
 	level := "warn"
 	msg := format(v...)
 	fmt.Fprintln(os.Stderr, lg.prefix(level)+lg.body(msg))
-	lg.WriteLevel(level, []byte(lg.body(msg)))
+	lg.writeLevel(level, []byte(lg.body(msg)))
 }
 
 func (lg *Logger) Write(b []byte) (int, error) {
-	return lg.WriteLevel("info", b)
+	return lg.writeLevel("info", b)
 }
 
-func (lg *Logger) WriteLevel(level string, b []byte) (int, error) {
+func (lg *Logger) writeLevel(level string, b []byte) (int, error) {
 
 	logitem := types.Log{
 		DashId:    0,
