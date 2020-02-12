@@ -1,7 +1,10 @@
 cloud.google.com/go v0.34.0/go.mod h1:aQUYkXzVsufM+DwF1aE+0xfcU+56JwCaLick0ClmMTw=
 github.com/504dev/go-kidlog v0.0.0-20200205152417-03024b70c741/go.mod h1:XIRDn17bvv0qZGPBlUaURfi8t8MgGUZRusqk3Ul04AU=
+github.com/504dev/go-kidlog v0.0.3/go.mod h1:YSOrRJ+2dLbTRdlKGN95ct0vpFnUANctDHyNvZGHitA=
 github.com/504dev/kidlog v0.0.0-20200208131113-85d3572e21f4 h1:+xyKbpgAJKZr9Xa+2FxSiibpfiRayXREdrQFCCJ7PpA=
 github.com/504dev/kidlog v0.0.0-20200208131113-85d3572e21f4/go.mod h1:UW/jzcZtWX8wKpCJb0BPoDrNB/kgF7bL/Zr0jYdeo6Y=
+github.com/504dev/kidlog v0.0.0-20200211235155-f84eb704545c h1:xufxyVvst0yQE78oGTwVHFAk/55XXfOWyTLfQVUq/o8=
+github.com/504dev/kidlog v0.0.0-20200211235155-f84eb704545c/go.mod h1:fJxClzhV8pWjK7sq4w4YGk90e8NSDe5ulpmAdeehlfU=
 github.com/ClickHouse/clickhouse-go v1.3.12/go.mod h1:EaI/sW7Azgz9UATzd5ZdZHRUhHgv5+JMS9NSr2smCJI=
 github.com/bkaradzic/go-lz4 v1.0.0/go.mod h1:0YdlkowM3VswSROI7qDxhRvJ3sLhlFrRRwjwegp5jy4=
 github.com/cloudflare/golz4 v0.0.0-20150217214814-ef862a3cdc58/go.mod h1:EOBUe0h4xcZ5GoxqC5SDxFQ8gwyZPKQoEzownBlhI80=
@@ -59,6 +62,7 @@ golang.org/x/sys v0.0.0-20190222072716-a9d3bda3a223/go.mod h1:STP8DvDyc/dI5b8T5h
 golang.org/x/sys v0.0.0-20190412213103-97732733099d/go.mod h1:h1NjWce9XRLGQEsW7wpKNCjG9DtNlClVuFLEZdDNbEs=
 golang.org/x/sys v0.0.0-20190507160741-ecd444e8653b/go.mod h1:h1NjWce9XRLGQEsW7wpKNCjG9DtNlClVuFLEZdDNbEs=
 golang.org/x/sys v0.0.0-20190606165138-5da285871e9c/go.mod h1:h1NjWce9XRLGQEsW7wpKNCjG9DtNlClVuFLEZdDNbEs=
+golang.org/x/sys v0.0.0-20191026070338-33540a1f6037 h1:YyJpGZS1sBuBCzLAR1VEpK193GlqGZbnPFnPV/5Rsb4=
 golang.org/x/sys v0.0.0-20191026070338-33540a1f6037/go.mod h1:h1NjWce9XRLGQEsW7wpKNCjG9DtNlClVuFLEZdDNbEs=
 golang.org/x/text v0.3.0/go.mod h1:NqM8EUOU14njkJ3fqMW+pc6Ldnwhi/IjpwHt7yyuwOQ=
 golang.org/x/text v0.3.2/go.mod h1:bEr9sfX3Q8Zfm5fL9x+3itogRgK3+ptLWKqgva+5dAk=
