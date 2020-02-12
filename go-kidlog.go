@@ -44,7 +44,7 @@ func readTag() string {
 	if len(parts) > 1 {
 		return parts[len(parts)-2]
 	}
-	return "-"
+	return ""
 }
 
 type Config struct {
@@ -62,7 +62,7 @@ func (c *Config) Create(logname string) (*Logger, error) {
 	res := &Logger{
 		Config:  c,
 		Logname: logname,
-		Body:    "[{tag}, {commit}, pid={pid}, {initiator}] {message}",
+		Body:    "[{tag|commit}, pid={pid}, {initiator}] {message}",
 		Prefix:  "{time} {level} ",
 		Conn:    conn,
 	}
@@ -77,15 +77,21 @@ type Logger struct {
 	net.Conn
 }
 
+const (
+	LevelInfo  = "info"
+	LevelWarn  = "warn"
+	LevelError = "error"
+)
+
 func (lg *Logger) prefix(level string) string {
 	dt := time.Now().Format(time.RFC3339)
 	flevel := level
 	switch level {
-	case "info":
+	case LevelInfo:
 		flevel = color.New(color.FgGreen).SprintFunc()(level)
-	case "warn":
+	case LevelWarn:
 		flevel = color.New(color.FgYellow).SprintFunc()(level)
-	case "error":
+	case LevelError:
 		flevel = color.New(color.FgRed).SprintFunc()(level)
 	}
 	res := lg.Prefix
@@ -96,8 +102,14 @@ func (lg *Logger) prefix(level string) string {
 
 func (lg *Logger) body(msg string) string {
 	res := lg.Body
+	commit := commit[:6]
+	tagOrCommit := tag
+	if tagOrCommit == "" {
+		tagOrCommit = commit
+	}
 	res = strings.Replace(res, "{tag}", tag, -1)
-	res = strings.Replace(res, "{commit}", commit[:6], -1)
+	res = strings.Replace(res, "{commit}", commit, -1)
+	res = strings.Replace(res, "{tag|commit}", tagOrCommit, -1)
 	res = strings.Replace(res, "{pid}", strconv.Itoa(pid), -1)
 	res = strings.Replace(res, "{initiator}", initiator(), -1)
 	res = strings.Replace(res, "{message}", msg, -1)
@@ -114,24 +126,32 @@ func format(vals ...interface{}) string {
 }
 
 func (lg *Logger) Info(v ...interface{}) {
-	level := "info"
-	msg := format(v...)
-	fmt.Fprintln(os.Stdout, lg.prefix(level)+lg.body(msg))
-	lg.writeLevel(level, []byte(lg.body(msg)))
+	level := LevelInfo
+	prefix := lg.prefix(level)
+	body := lg.body(format(v...))
+	fmt.Fprintln(os.Stdout, prefix+body)
+	lg.writeLevel(level, []byte(body))
 }
 
 func (lg *Logger) Error(v ...interface{}) {
-	level := "error"
-	msg := format(v...)
-	fmt.Fprintln(os.Stderr, lg.prefix(level)+lg.body(msg))
-	lg.writeLevel(level, []byte(lg.body(msg)))
+	level := LevelError
+	prefix := lg.prefix(level)
+	body := lg.body(format(v...))
+	fmt.Fprintln(os.Stderr, prefix+body)
+	lg.writeLevel(level, []byte(body))
 }
 
 func (lg *Logger) Warn(v ...interface{}) {
-	level := "warn"
-	msg := format(v...)
-	fmt.Fprintln(os.Stderr, lg.prefix(level)+lg.body(msg))
-	lg.writeLevel(level, []byte(lg.body(msg)))
+	level := LevelWarn
+	prefix := lg.prefix(level)
+	body := lg.body(format(v...))
+	fmt.Fprintln(os.Stderr, prefix+body)
+	lg.writeLevel(level, []byte(body))
+}
+
+func (lg *Logger) SendLog(level string, v ...interface{}) (int, error) {
+	body := lg.body(format(v...))
+	return lg.writeLevel(level, []byte(body))
 }
 
 func (lg *Logger) Write(b []byte) (int, error) {
