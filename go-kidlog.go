@@ -21,7 +21,7 @@ var pid = os.Getpid()
 
 func initiator() string {
 	stack := string(debug.Stack())
-	caller := strings.TrimSpace(strings.Split(stack, "\n")[10])
+	caller := strings.TrimSpace(strings.Split(stack, "\n")[12])
 	splitted := regexp.MustCompile(`[\s\/]+`).Split(caller, 20)
 	length := len(splitted)
 	caller = strings.Join(splitted[length-3:length-1], "/")
@@ -78,15 +78,25 @@ type Logger struct {
 }
 
 const (
+	LevelDebug = "debug"
 	LevelInfo  = "info"
 	LevelWarn  = "warn"
 	LevelError = "error"
 )
 
+var std = map[string]*os.File{
+	LevelDebug: os.Stdout,
+	LevelInfo:  os.Stdout,
+	LevelWarn:  os.Stderr,
+	LevelError: os.Stderr,
+}
+
 func (lg *Logger) prefix(level string) string {
 	dt := time.Now().Format(time.RFC3339)
 	flevel := level
 	switch level {
+	case LevelDebug:
+		flevel = color.New(color.FgBlue).SprintFunc()(level)
 	case LevelInfo:
 		flevel = color.New(color.FgGreen).SprintFunc()(level)
 	case LevelWarn:
@@ -125,28 +135,27 @@ func format(vals ...interface{}) string {
 	}
 }
 
-func (lg *Logger) Info(v ...interface{}) {
-	level := LevelInfo
+func (lg *Logger) Log(level string, v ...interface{}) {
 	prefix := lg.prefix(level)
 	body := lg.body(format(v...))
-	fmt.Fprintln(os.Stdout, prefix+body)
+	fmt.Fprintln(std[level], prefix+body)
 	lg.writeLevel(level, []byte(body))
 }
 
-func (lg *Logger) Error(v ...interface{}) {
-	level := LevelError
-	prefix := lg.prefix(level)
-	body := lg.body(format(v...))
-	fmt.Fprintln(os.Stderr, prefix+body)
-	lg.writeLevel(level, []byte(body))
+func (lg *Logger) Debug(v ...interface{}) {
+	lg.Log(LevelDebug, v...)
+}
+
+func (lg *Logger) Info(v ...interface{}) {
+	lg.Log(LevelInfo, v...)
 }
 
 func (lg *Logger) Warn(v ...interface{}) {
-	level := LevelWarn
-	prefix := lg.prefix(level)
-	body := lg.body(format(v...))
-	fmt.Fprintln(os.Stderr, prefix+body)
-	lg.writeLevel(level, []byte(body))
+	lg.Log(LevelWarn, v...)
+}
+
+func (lg *Logger) Error(v ...interface{}) {
+	lg.Log(LevelError, v...)
 }
 
 func (lg *Logger) SendLog(level string, v ...interface{}) (int, error) {
