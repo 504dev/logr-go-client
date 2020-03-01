@@ -49,6 +49,7 @@ func readTag() string {
 
 type Config struct {
 	Udp        string
+	DashId     int
 	PublicKey  string
 	PrivateKey string
 	Hostname   string
@@ -170,7 +171,7 @@ func (lg *Logger) Write(b []byte) (int, error) {
 func (lg *Logger) writeLevel(level string, b []byte) (int, error) {
 
 	logitem := types.Log{
-		DashId:    0,
+		DashId:    lg.Config.DashId,
 		Timestamp: time.Now().UnixNano(),
 		Hostname:  lg.Config.Hostname,
 		Logname:   lg.Logname,
@@ -182,6 +183,7 @@ func (lg *Logger) writeLevel(level string, b []byte) (int, error) {
 		return 0, err
 	}
 	lp := types.LogPackage{
+		DashId:     lg.Config.DashId,
 		PublicKey:  lg.PublicKey,
 		CipherText: cipherText,
 	}
