@@ -56,7 +56,7 @@ type Config struct {
 }
 
 func (c *Config) Create(logname string) (*Logger, error) {
-	conn, err := net.Dial("udp", "127.0.0.1:7776")
+	conn, err := net.Dial("udp", c.Udp)
 	if err != nil {
 		return nil, err
 	}
