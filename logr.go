@@ -54,10 +54,16 @@ type Logger struct {
 	Prefix  string
 }
 
-func (lg *Logger) Parser(f func(log *Log)) *Parser {
-	return &Parser{
+func (lg *Logger) DefaultWritter() *Writter {
+	return &Writter{
 		Logger: lg,
-		Handle: f,
+	}
+}
+
+func (lg *Logger) CustomWritter(f func(log *Log)) *Writter {
+	return &Writter{
+		Logger:    lg,
+		Transform: f,
 	}
 }
 

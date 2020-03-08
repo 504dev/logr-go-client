@@ -4,18 +4,18 @@ import (
 	"github.com/504dev/kidlog/types"
 )
 
-type Parser struct {
+type Writter struct {
 	*Logger
-	Handle func(log *Log)
+	Transform func(log *Log)
 }
 
-func (p *Parser) Write(b []byte) (int, error) {
+func (p *Writter) Write(b []byte) (int, error) {
 	log := p.blankLog()
 	log.Level = LevelInfo
 	log.Message = string(b)
 
-	if p.Handle != nil {
-		p.Handle(&Log{Log: log})
+	if p.Transform != nil {
+		p.Transform(&Log{Log: log})
 	}
 
 	return p.writeLog(log)
