@@ -7,53 +7,29 @@ import (
 	"github.com/fatih/color"
 	"net"
 	"os"
-	"os/exec"
-	"regexp"
-	"runtime/debug"
 	"strconv"
 	"strings"
 	"time"
 )
 
+const (
+	LevelDebug = "debug"
+	LevelInfo  = "info"
+	LevelWarn  = "warn"
+	LevelError = "error"
+)
+
+var std = map[string]*os.File{
+	LevelDebug: os.Stdout,
+	LevelInfo:  os.Stdout,
+	LevelWarn:  os.Stderr,
+	LevelError: os.Stderr,
+}
+
 var commit = readCommit()
 var tag = readTag()
 var pid = os.Getpid()
-
-func initiator() string {
-	stack := string(debug.Stack())
-	caller := strings.TrimSpace(strings.Split(stack, "\n")[12])
-	splitted := regexp.MustCompile(`[\s\/]+`).Split(caller, 20)
-	length := len(splitted)
-	caller = strings.Join(splitted[length-3:length-1], "/")
-	return caller
-}
-
-func readCommit() string {
-	cmd := exec.Command("git", "rev-parse", "HEAD")
-	stdout, _ := cmd.Output()
-
-	return string(stdout)
-}
-
-func readTag() string {
-	cmd := exec.Command("git", "tag", "-l", "--points-at", "HEAD")
-	stdout, _ := cmd.Output()
-	tmp := string(stdout)
-	parts := strings.Split(tmp, "\n")
-
-	if len(parts) > 1 {
-		return parts[len(parts)-2]
-	}
-	return ""
-}
-
-type Config struct {
-	Udp        string
-	DashId     int
-	PublicKey  string
-	PrivateKey string
-	Hostname   string
-}
+var hostname, _ = os.Hostname()
 
 func (c *Config) Create(logname string) (*Logger, error) {
 	conn, err := net.Dial("udp", c.Udp)
@@ -72,24 +48,17 @@ func (c *Config) Create(logname string) (*Logger, error) {
 
 type Logger struct {
 	*Config
+	net.Conn
 	Logname string
 	Body    string
 	Prefix  string
-	net.Conn
 }
 
-const (
-	LevelDebug = "debug"
-	LevelInfo  = "info"
-	LevelWarn  = "warn"
-	LevelError = "error"
-)
-
-var std = map[string]*os.File{
-	LevelDebug: os.Stdout,
-	LevelInfo:  os.Stdout,
-	LevelWarn:  os.Stderr,
-	LevelError: os.Stderr,
+func (lg *Logger) Parser(f func(log *Log)) *Parser {
+	return &Parser{
+		Logger: lg,
+		Handle: f,
+	}
 }
 
 func (lg *Logger) prefix(level string) string {
@@ -136,13 +105,6 @@ func format(vals ...interface{}) string {
 	}
 }
 
-func (lg *Logger) Log(level string, v ...interface{}) {
-	prefix := lg.prefix(level)
-	body := lg.body(format(v...))
-	fmt.Fprintln(std[level], prefix+body)
-	lg.writeLevel(level, []byte(body))
-}
-
 func (lg *Logger) Debug(v ...interface{}) {
 	lg.Log(LevelDebug, v...)
 }
@@ -159,26 +121,32 @@ func (lg *Logger) Error(v ...interface{}) {
 	lg.Log(LevelError, v...)
 }
 
-func (lg *Logger) SendLog(level string, v ...interface{}) (int, error) {
+func (lg *Logger) Log(level string, v ...interface{}) {
+	prefix := lg.prefix(level)
 	body := lg.body(format(v...))
-	return lg.writeLevel(level, []byte(body))
+	fmt.Fprintln(std[level], prefix+body)
+	lg.writeLevel(level, []byte(body))
 }
 
-func (lg *Logger) Write(b []byte) (int, error) {
-	return lg.writeLevel("info", b)
+func (lg *Logger) blankLog() *types.Log {
+	return &types.Log{
+		DashId:    lg.Config.DashId,
+		Timestamp: time.Now().UnixNano(),
+		Hostname:  lg.GetHostname(),
+		Logname:   lg.Logname,
+	}
 }
 
 func (lg *Logger) writeLevel(level string, b []byte) (int, error) {
+	log := lg.blankLog()
+	log.Level = level
+	log.Message = string(b)
 
-	logitem := types.Log{
-		DashId:    lg.Config.DashId,
-		Timestamp: time.Now().UnixNano(),
-		Hostname:  lg.Config.Hostname,
-		Logname:   lg.Logname,
-		Level:     level,
-		Message:   string(b),
-	}
-	cipherText, err := logitem.Encrypt(lg.PrivateKey)
+	return lg.writeLog(log)
+}
+
+func (lg *Logger) writeLog(log *types.Log) (int, error) {
+	cipherText, err := log.Encrypt(lg.PrivateKey)
 	if err != nil {
 		return 0, err
 	}
@@ -195,5 +163,5 @@ func (lg *Logger) writeLevel(level string, b []byte) (int, error) {
 	if err != nil {
 		return 0, err
 	}
-	return len(b), nil
+	return len(msg), nil
 }
