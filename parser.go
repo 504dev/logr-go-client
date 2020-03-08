@@ -10,13 +10,15 @@ type Parser struct {
 }
 
 func (p *Parser) Write(b []byte) (int, error) {
-	blank := p.blankLog()
-	blank.Level = LevelInfo
-	blank.Message = string(b)
+	log := p.blankLog()
+	log.Level = LevelInfo
+	log.Message = string(b)
 
-	p.Handle(&Log{Log: blank})
+	if p.Handle != nil {
+		p.Handle(&Log{Log: log})
+	}
 
-	return p.writeLog(blank)
+	return p.writeLog(log)
 }
 
 type Log struct {
