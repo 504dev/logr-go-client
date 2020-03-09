@@ -152,14 +152,14 @@ func (lg *Logger) writeLevel(level string, b []byte) (int, error) {
 }
 
 func (lg *Logger) writeLog(log *types.Log) (int, error) {
-	cipherText, err := log.Encrypt(lg.PrivateKey)
+	cipherLog, err := log.Encrypt(lg.PrivateKey)
 	if err != nil {
 		return 0, err
 	}
 	lp := types.LogPackage{
-		DashId:     lg.Config.DashId,
-		PublicKey:  lg.PublicKey,
-		CipherText: cipherText,
+		DashId:    lg.Config.DashId,
+		PublicKey: lg.PublicKey,
+		CipherLog: cipherLog,
 	}
 	msg, err := json.Marshal(lp)
 	if err != nil {
