@@ -31,7 +31,7 @@ var tag = readTag()
 var pid = os.Getpid()
 var hostname, _ = os.Hostname()
 
-func (c *Config) Create(logname string) (*Logger, error) {
+func (c *Config) NewLogger(logname string) (*Logger, error) {
 	conn, err := net.Dial("udp", c.Udp)
 	if err != nil {
 		return nil, err
@@ -157,7 +157,7 @@ func (lg *Logger) writeLog(log *types.Log) (int, error) {
 		return 0, err
 	}
 	lp := types.LogPackage{
-		DashId:    lg.Config.DashId,
+		DashId:    lg.DashId,
 		PublicKey: lg.PublicKey,
 		CipherLog: cipherLog,
 	}
