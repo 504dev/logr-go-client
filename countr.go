@@ -38,12 +38,12 @@ func (ctr *Counter) run(interval time.Duration) {
 	go (func() {
 		for {
 			<-ctr.Ticker.C
-			ctr.Flush()
+			ctr.flush()
 		}
 	})()
 }
 
-func (ctr *Counter) Flush() {
+func (ctr *Counter) flush() {
 	ctr.Lock()
 	tmp := ctr.Tmp
 	ctr.Tmp = make(map[string]*types.Count)
@@ -57,14 +57,14 @@ func (ctr *Counter) Flush() {
 }
 
 func (ctr *Counter) writeCount(count *types.Count) (int, error) {
-	cipherCount, err := count.Encrypt(ctr.PrivateKey)
+	cipherText, err := count.Encrypt(ctr.PrivateKey)
 	if err != nil {
 		return 0, err
 	}
 	lp := types.LogPackage{
-		DashId:    ctr.Config.DashId,
-		PublicKey: ctr.Config.PublicKey,
-		CipherLog: cipherCount,
+		DashId:      ctr.Config.DashId,
+		PublicKey:   ctr.Config.PublicKey,
+		CipherCount: cipherText,
 	}
 	msg, err := json.Marshal(lp)
 	if err != nil {
