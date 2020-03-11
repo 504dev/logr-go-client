@@ -14,13 +14,14 @@ func (c *Config) NewCounter(name string) (*Counter, error) {
 	if err != nil {
 		return nil, err
 	}
-	res := &Counter{
+	ctr := &Counter{
 		Config:  c,
 		Conn:    conn,
 		Logname: name,
 		Tmp:     make(map[string]*types.Count),
 	}
-	return res, nil
+	ctr.run(10 * time.Second)
+	return ctr, nil
 }
 
 type Counter struct {
@@ -32,7 +33,7 @@ type Counter struct {
 	Tmp     map[string]*types.Count
 }
 
-func (ctr *Counter) Run(interval time.Duration) {
+func (ctr *Counter) run(interval time.Duration) {
 	ctr.Ticker = time.NewTicker(interval)
 	go (func() {
 		for {
