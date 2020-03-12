@@ -89,22 +89,22 @@ func (ctr *Counter) touch(key string) *types.Count {
 	}
 	return ctr.Tmp[key]
 }
-func (ctr *Counter) Inc(key string, num float64) {
-	ctr.touch(key).Inc(num)
+func (ctr *Counter) Inc(key string, num float64) *types.Count {
+	return ctr.touch(key).Inc(num)
 }
 
-func (ctr *Counter) Max(key string, num float64) {
-	ctr.touch(key).Max(num)
+func (ctr *Counter) Max(key string, num float64) *types.Count {
+	return ctr.touch(key).Max(num)
 }
 
-func (ctr *Counter) Min(key string, num float64) {
-	ctr.touch(key).Min(num)
+func (ctr *Counter) Min(key string, num float64) *types.Count {
+	return ctr.touch(key).Min(num)
 }
 
-func (ctr *Counter) Avg(key string, num float64) {
-	ctr.touch(key).Avg(num)
+func (ctr *Counter) Avg(key string, num float64) *types.Count {
+	return ctr.touch(key).Avg(num)
 }
 
-func (ctr *Counter) Per(key string, taken float64, total float64) {
-	ctr.touch(key).Per(taken, total)
+func (ctr *Counter) Per(key string, taken float64, total float64) *types.Count {
+	return ctr.touch(key).Per(taken, total)
 }
