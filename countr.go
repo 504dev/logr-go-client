@@ -81,7 +81,7 @@ func (ctr *Counter) touch(key string) *types.Count {
 	if _, ok := ctr.Tmp[key]; !ok {
 		ctr.Tmp[key] = &types.Count{
 			DashId:    ctr.Config.DashId,
-			Timestamp: time.Now().UnixNano(),
+			Timestamp: time.Now(),
 			Hostname:  ctr.GetHostname(),
 			Logname:   ctr.Logname,
 			Keyname:   key,
