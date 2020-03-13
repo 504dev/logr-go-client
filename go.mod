@@ -1,4 +1,4 @@
-module github.com/504dev/go-kidlog
+module github.com/504dev/logr-go-client
 
 go 1.13
 
