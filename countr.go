@@ -80,10 +80,10 @@ func (ctr *Counter) writeCount(count *types.Count) (int, error) {
 func (ctr *Counter) touch(key string) *types.Count {
 	if _, ok := ctr.Tmp[key]; !ok {
 		ctr.Tmp[key] = &types.Count{
-			DashId:    ctr.Config.DashId,
-			Hostname:  ctr.GetHostname(),
-			Logname:   ctr.Logname,
-			Keyname:   key,
+			DashId:   ctr.Config.DashId,
+			Hostname: ctr.GetHostname(),
+			Logname:  ctr.Logname,
+			Keyname:  key,
 		}
 	}
 	return ctr.Tmp[key]

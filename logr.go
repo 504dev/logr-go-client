@@ -26,11 +26,6 @@ var std = map[string]*os.File{
 	LevelError: os.Stderr,
 }
 
-var commit = readCommit()
-var tag = readTag()
-var pid = os.Getpid()
-var hostname, _ = os.Hostname()
-
 func (c *Config) NewLogger(logname string) (*Logger, error) {
 	conn, err := net.Dial("udp", c.Udp)
 	if err != nil {
@@ -39,8 +34,8 @@ func (c *Config) NewLogger(logname string) (*Logger, error) {
 	res := &Logger{
 		Config:  c,
 		Logname: logname,
-		Body:    "[{tag|commit}, pid={pid}, {initiator}] {message}",
 		Prefix:  "{time} {level} ",
+		Body:    "[{version}, pid={pid}, {initiator}] {message}",
 		Conn:    conn,
 	}
 	return res, nil
@@ -88,15 +83,8 @@ func (lg *Logger) prefix(level string) string {
 
 func (lg *Logger) body(msg string) string {
 	res := lg.Body
-	commit := commit[:6]
-	tagOrCommit := tag
-	if tagOrCommit == "" {
-		tagOrCommit = commit
-	}
-	res = strings.Replace(res, "{tag}", tag, -1)
-	res = strings.Replace(res, "{commit}", commit, -1)
-	res = strings.Replace(res, "{tag|commit}", tagOrCommit, -1)
-	res = strings.Replace(res, "{pid}", strconv.Itoa(pid), -1)
+	res = strings.Replace(res, "{version}", lg.GetVersion(), -1)
+	res = strings.Replace(res, "{pid}", strconv.Itoa(lg.GetPid()), -1)
 	res = strings.Replace(res, "{initiator}", initiator(), -1)
 	res = strings.Replace(res, "{message}", msg, -1)
 	return res
@@ -140,6 +128,8 @@ func (lg *Logger) blankLog() *types.Log {
 		Timestamp: time.Now().UnixNano(),
 		Hostname:  lg.GetHostname(),
 		Logname:   lg.Logname,
+		Pid:       lg.GetPid(),
+		Version:   lg.GetVersion(),
 	}
 }
 
