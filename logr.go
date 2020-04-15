@@ -28,9 +28,6 @@ var std = map[string]*os.File{
 
 func (c *Config) NewLogger(logname string) (*Logger, error) {
 	conn, err := net.Dial("udp", c.Udp)
-	if err != nil {
-		return nil, err
-	}
 	res := &Logger{
 		Config:  c,
 		Logname: logname,
@@ -38,7 +35,7 @@ func (c *Config) NewLogger(logname string) (*Logger, error) {
 		Body:    "[{version}, pid={pid}, {initiator}] {message}",
 		Conn:    conn,
 	}
-	return res, nil
+	return res, err
 }
 
 type Logger struct {
