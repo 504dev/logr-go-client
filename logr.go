@@ -116,7 +116,7 @@ func (lg *Logger) Log(level string, v ...interface{}) {
 	prefix := lg.prefix(level)
 	body := lg.body(format(v...))
 	fmt.Fprintln(std[level], prefix+body)
-	lg.writeLevel(level, []byte(body))
+	lg.writeLevel(level, body)
 }
 
 func (lg *Logger) blankLog() *types.Log {
@@ -130,15 +130,18 @@ func (lg *Logger) blankLog() *types.Log {
 	}
 }
 
-func (lg *Logger) writeLevel(level string, b []byte) (int, error) {
+func (lg *Logger) writeLevel(level string, msg string) (int, error) {
 	log := lg.blankLog()
 	log.Level = level
-	log.Message = string(b)
+	log.Message = msg
 
 	return lg.writeLog(log)
 }
 
 func (lg *Logger) writeLog(log *types.Log) (int, error) {
+	if (lg.Conn == nil) {
+		return 0, nil
+	}
 	cipherLog, err := log.Encrypt(lg.PrivateKey)
 	if err != nil {
 		return 0, err

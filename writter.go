@@ -9,16 +9,16 @@ type Writter struct {
 	Transform func(log *Log)
 }
 
-func (p *Writter) Write(b []byte) (int, error) {
-	log := p.blankLog()
+func (w *Writter) Write(b []byte) (int, error) {
+	log := w.blankLog()
 	log.Level = LevelInfo
 	log.Message = string(b)
 
-	if p.Transform != nil {
-		p.Transform(&Log{Log: log})
+	if w.Transform != nil {
+		w.Transform(&Log{Log: log})
 	}
 
-	return p.writeLog(log)
+	return w.writeLog(log)
 }
 
 type Log struct {
