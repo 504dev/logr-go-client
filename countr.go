@@ -104,3 +104,11 @@ func (ctr *Counter) Avg(key string, num float64) *types.Count {
 func (ctr *Counter) Per(key string, taken float64, total float64) *types.Count {
 	return ctr.touch(key).Per(taken, total)
 }
+
+func (ctr *Counter) Time(key string, d time.Duration) func() *types.Count {
+	ts := time.Now()
+	return func() *types.Count {
+		delta := float64(time.Since(ts) / d)
+		return ctr.touch(key).Avg(delta).Min(delta).Max(delta)
+	}
+}
