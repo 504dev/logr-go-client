@@ -11,9 +11,6 @@ import (
 
 func (c *Config) NewCounter(name string) (*Counter, error) {
 	conn, err := net.Dial("udp", c.Udp)
-	if err != nil {
-		return nil, err
-	}
 	ctr := &Counter{
 		Config:  c,
 		Conn:    conn,
@@ -21,7 +18,7 @@ func (c *Config) NewCounter(name string) (*Counter, error) {
 		Tmp:     make(map[string]*types.Count),
 	}
 	ctr.run(10 * time.Second)
-	return ctr, nil
+	return ctr, err
 }
 
 type Counter struct {

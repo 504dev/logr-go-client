@@ -139,7 +139,7 @@ func (lg *Logger) writeLevel(level string, msg string) (int, error) {
 }
 
 func (lg *Logger) writeLog(log *types.Log) (int, error) {
-	if (lg.Conn == nil) {
+	if lg.Conn == nil {
 		return 0, nil
 	}
 	cipherLog, err := log.Encrypt(lg.PrivateKey)
