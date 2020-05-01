@@ -54,6 +54,9 @@ func (ctr *Counter) flush() {
 }
 
 func (ctr *Counter) writeCount(count *types.Count) (int, error) {
+	if ctr.Conn == nil {
+		return 0, nil
+	}
 	cipherText, err := count.Encrypt(ctr.PrivateKey)
 	if err != nil {
 		return 0, err
