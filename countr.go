@@ -109,15 +109,5 @@ func (ctr *Counter) Per(key string, taken float64, total float64) *types.Count {
 }
 
 func (ctr *Counter) Time(key string, d time.Duration) func() time.Duration {
-	ts := time.Now()
-	var delta *time.Duration
-	return func() time.Duration {
-		if delta == nil {
-			tmp := time.Since(ts)
-			delta = &tmp
-			num := float64(time.Since(ts).Nanoseconds()) / float64(d.Nanoseconds())
-			ctr.touch(key).Avg(num).Min(num).Max(num)
-		}
-		return *delta
-	}
+	return ctr.touch(key).Time(d)
 }
