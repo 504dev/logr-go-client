@@ -84,6 +84,7 @@ func (ctr *Counter) touch(key string) *types.Count {
 			Hostname: ctr.GetHostname(),
 			Logname:  ctr.Logname,
 			Keyname:  key,
+			Version:  ctr.GetVersion(),
 		}
 	}
 	return ctr.Tmp[key]
