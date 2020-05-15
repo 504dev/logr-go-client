@@ -34,7 +34,14 @@ func (c *Config) NewLogger(logname string) (*Logger, error) {
 		Prefix:  "{time} {level} ",
 		Body:    "[{version}, pid={pid}, {initiator}] {message}",
 		Conn:    conn,
+		Counter: &Counter{
+			Config:  c,
+			Conn:    conn,
+			Logname: logname,
+			Tmp:     make(map[string]*types.Count),
+		},
 	}
+	res.Counter.run(10 * time.Second)
 	return res, err
 }
 
@@ -44,6 +51,7 @@ type Logger struct {
 	Logname string
 	Body    string
 	Prefix  string
+	*Counter
 }
 
 func (lg *Logger) DefaultWritter() *Writter {
