@@ -78,6 +78,7 @@ func (ctr *Counter) writeCount(count *types.Count) (int, error) {
 }
 
 func (ctr *Counter) touch(key string) *types.Count {
+	ctr.Lock()
 	if _, ok := ctr.Tmp[key]; !ok {
 		ctr.Tmp[key] = &types.Count{
 			DashId:   ctr.Config.DashId,
@@ -87,6 +88,7 @@ func (ctr *Counter) touch(key string) *types.Count {
 			Version:  ctr.GetVersion(),
 		}
 	}
+	ctr.Unlock()
 	return ctr.Tmp[key]
 }
 func (ctr *Counter) Inc(key string, num float64) *types.Count {
