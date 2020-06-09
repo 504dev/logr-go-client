@@ -1,8 +1,8 @@
-package go_kidlog
+package logr_go_client
 
 import (
 	"encoding/json"
-	"github.com/504dev/kidlog/types"
+	"github.com/504dev/logr/types"
 	"log"
 	"net"
 	"sync"

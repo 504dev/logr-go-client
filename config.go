@@ -1,4 +1,4 @@
-package go_kidlog
+package logr_go_client
 
 import "os"
 
