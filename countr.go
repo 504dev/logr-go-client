@@ -77,7 +77,7 @@ func (ctr *Counter) writeCount(count *types.Count) (int, error) {
 	return len(msg), nil
 }
 
-func (ctr *Counter) touch(key string) *types.Count {
+func (ctr *Counter) Touch(key string) *types.Count {
 	ctr.Lock()
 	if _, ok := ctr.Tmp[key]; !ok {
 		ctr.Tmp[key] = &types.Count{
@@ -92,25 +92,25 @@ func (ctr *Counter) touch(key string) *types.Count {
 	return ctr.Tmp[key]
 }
 func (ctr *Counter) Inc(key string, num float64) *types.Count {
-	return ctr.touch(key).Inc(num)
+	return ctr.Touch(key).Inc(num)
 }
 
 func (ctr *Counter) Max(key string, num float64) *types.Count {
-	return ctr.touch(key).Max(num)
+	return ctr.Touch(key).Max(num)
 }
 
 func (ctr *Counter) Min(key string, num float64) *types.Count {
-	return ctr.touch(key).Min(num)
+	return ctr.Touch(key).Min(num)
 }
 
 func (ctr *Counter) Avg(key string, num float64) *types.Count {
-	return ctr.touch(key).Avg(num)
+	return ctr.Touch(key).Avg(num)
 }
 
 func (ctr *Counter) Per(key string, taken float64, total float64) *types.Count {
-	return ctr.touch(key).Per(taken, total)
+	return ctr.Touch(key).Per(taken, total)
 }
 
 func (ctr *Counter) Time(key string, d time.Duration) func() time.Duration {
-	return ctr.touch(key).Time(d)
+	return ctr.Touch(key).Time(d)
 }
