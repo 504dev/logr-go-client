@@ -26,25 +26,6 @@ var std = map[string]*os.File{
 	LevelError: os.Stderr,
 }
 
-func (c *Config) NewLogger(logname string) (*Logger, error) {
-	conn, err := net.Dial("udp", c.Udp)
-	res := &Logger{
-		Config:  c,
-		Logname: logname,
-		Prefix:  "{time} {level} ",
-		Body:    "[{version}, pid={pid}, {initiator}] {message}",
-		Conn:    conn,
-		Counter: &Counter{
-			Config:  c,
-			Conn:    conn,
-			Logname: logname,
-			Tmp:     make(map[string]*types.Count),
-		},
-	}
-	res.Counter.run(10 * time.Second)
-	return res, err
-}
-
 type Logger struct {
 	*Config
 	net.Conn

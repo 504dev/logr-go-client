@@ -1,6 +1,11 @@
 package logr_go_client
 
-import "os"
+import (
+	"github.com/504dev/logr/types"
+	"net"
+	"os"
+	"time"
+)
 
 var hostname, _ = os.Hostname()
 var pid = os.Getpid()
@@ -14,6 +19,25 @@ type Config struct {
 	PrivateKey string
 	Hostname   string
 	Version    string
+}
+
+func (c *Config) NewLogger(logname string) (*Logger, error) {
+	conn, err := net.Dial("udp", c.Udp)
+	res := &Logger{
+		Config:  c,
+		Logname: logname,
+		Prefix:  "{time} {level} ",
+		Body:    "[{version}, pid={pid}, {initiator}] {message}",
+		Conn:    conn,
+		Counter: &Counter{
+			Config:  c,
+			Conn:    conn,
+			Logname: logname,
+			Tmp:     make(map[string]*types.Count),
+		},
+	}
+	res.Counter.run(10 * time.Second)
+	return res, err
 }
 
 func (c *Config) GetHostname() string {
