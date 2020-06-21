@@ -109,3 +109,23 @@ func (ctr *Counter) Per(key string, taken float64, total float64) *types.Count {
 func (ctr *Counter) Time(key string, d time.Duration) func() time.Duration {
 	return ctr.Touch(key).Time(d)
 }
+
+func (ctr *Counter) Widget(kind string, keyname string, limit int) string {
+	w := struct {
+		Widget   string `json:"widget"`
+		Logname  string `json:"logname"`
+		Hostname string `json:"hostname"`
+		Keyname  string `json:"keyname"`
+		Kind     string `json:"kind"`
+		Limit    int    `json:"limit,omitempty"`
+	}{
+		"counter",
+		ctr.Logname,
+		ctr.GetHostname(),
+		keyname,
+		kind,
+		limit,
+	}
+	text, _ := json.Marshal(w)
+	return string(text)
+}
