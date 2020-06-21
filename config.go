@@ -31,13 +31,22 @@ func (c *Config) NewLogger(logname string) (*Logger, error) {
 		Conn:    conn,
 		Counter: &Counter{
 			Config:  c,
-			Conn:    conn,
 			Logname: logname,
 			Tmp:     make(map[string]*types.Count),
 		},
 	}
-	res.Counter.run(10 * time.Second)
+	_ = res.Counter.run(10 * time.Second)
 	return res, err
+}
+
+func (c *Config) NewCounter(name string) (*Counter, error) {
+	ctr := &Counter{
+		Config:  c,
+		Logname: name,
+		Tmp:     make(map[string]*types.Count),
+	}
+	err := ctr.run(10 * time.Second)
+	return ctr, err
 }
 
 func (c *Config) GetHostname() string {

@@ -9,18 +9,6 @@ import (
 	"time"
 )
 
-func (c *Config) NewCounter(name string) (*Counter, error) {
-	conn, err := net.Dial("udp", c.Udp)
-	ctr := &Counter{
-		Config:  c,
-		Conn:    conn,
-		Logname: name,
-		Tmp:     make(map[string]*types.Count),
-	}
-	ctr.run(10 * time.Second)
-	return ctr, err
-}
-
 type Counter struct {
 	*Config
 	net.Conn
@@ -30,7 +18,12 @@ type Counter struct {
 	Tmp     map[string]*types.Count
 }
 
-func (ctr *Counter) run(interval time.Duration) {
+func (ctr *Counter) run(interval time.Duration) error {
+	var err error
+	if ctr.Conn == nil {
+		ctr.Conn, err = net.Dial("udp", ctr.Udp)
+	}
+
 	ctr.Ticker = time.NewTicker(interval)
 	go (func() {
 		for {
@@ -38,6 +31,8 @@ func (ctr *Counter) run(interval time.Duration) {
 			ctr.flush()
 		}
 	})()
+
+	return err
 }
 
 func (ctr *Counter) flush() {
