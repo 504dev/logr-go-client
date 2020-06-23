@@ -3,19 +3,31 @@ package logr_go_client
 import (
 	"encoding/json"
 	"github.com/504dev/logr/types"
+	"github.com/shirou/gopsutil/cpu"
+	"github.com/shirou/gopsutil/disk"
+	"github.com/shirou/gopsutil/load"
+	"github.com/shirou/gopsutil/mem"
 	"log"
 	"net"
 	"sync"
 	"time"
 )
 
+type Tmp map[string]*types.Count
+
+func (cm Tmp) String() string {
+	text, _ := json.MarshalIndent(cm, "", "  ")
+	return string(text)
+}
+
 type Counter struct {
 	*Config
 	net.Conn
 	sync.Mutex
 	*time.Ticker
-	Logname string
-	Tmp     map[string]*types.Count
+	Tmp
+	Logname      string
+	watchSystem  bool
 }
 
 func (ctr *Counter) run(interval time.Duration) error {
@@ -28,17 +40,30 @@ func (ctr *Counter) run(interval time.Duration) error {
 	go (func() {
 		for {
 			<-ctr.Ticker.C
-			ctr.flush()
+
+			ctr.Flush()
 		}
 	})()
 
 	return err
 }
 
-func (ctr *Counter) flush() {
+func (ctr *Counter) Flush() Tmp {
+	if ctr.watchSystem {
+		l, _ := load.Avg()
+		m, _ := mem.VirtualMemory()
+		d, _ := disk.Usage("/")
+		c, _ := cpu.Percent(time.Second, true)
+		ctr.Avg("la", l.Load1)
+		ctr.Per("mem", float64(m.Used), float64(m.Total))
+		ctr.Per("disk", float64(d.Used), float64(d.Total))
+		for _, v := range c {
+			ctr.Per("cpu", v, 100)
+		}
+	}
 	ctr.Lock()
 	tmp := ctr.Tmp
-	ctr.Tmp = make(map[string]*types.Count)
+	ctr.Tmp = make(Tmp)
 	ctr.Unlock()
 	for _, c := range tmp {
 		_, err := ctr.writeCount(c)
@@ -46,6 +71,7 @@ func (ctr *Counter) flush() {
 			log.Println(err)
 		}
 	}
+	return tmp
 }
 
 func (ctr *Counter) writeCount(count *types.Count) (int, error) {
@@ -128,4 +154,8 @@ func (ctr *Counter) Widget(kind string, keyname string, limit int) string {
 	}
 	text, _ := json.Marshal(w)
 	return string(text)
+}
+
+func (ctr *Counter) WatchSystem() {
+	ctr.watchSystem = true
 }
