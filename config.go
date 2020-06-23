@@ -29,13 +29,8 @@ func (c *Config) NewLogger(logname string) (*Logger, error) {
 		Prefix:  "{time} {level} ",
 		Body:    "[{version}, pid={pid}, {initiator}] {message}",
 		Conn:    conn,
-		Counter: &Counter{
-			Config:  c,
-			Logname: logname,
-			Tmp:     make(map[string]*types.Count),
-		},
 	}
-	_ = res.Counter.run(10 * time.Second)
+	res.Counter, _ = c.NewCounter(logname)
 	return res, err
 }
 
@@ -45,7 +40,8 @@ func (c *Config) NewCounter(name string) (*Counter, error) {
 		Logname: name,
 		Tmp:     make(map[string]*types.Count),
 	}
-	err := ctr.run(10 * time.Second)
+	err := ctr.connect()
+	ctr.run(10 * time.Second)
 	return ctr, err
 }
 

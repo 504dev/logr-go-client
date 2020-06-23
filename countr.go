@@ -7,6 +7,7 @@ import (
 	"github.com/shirou/gopsutil/disk"
 	"github.com/shirou/gopsutil/load"
 	"github.com/shirou/gopsutil/mem"
+	"github.com/shirou/gopsutil/process"
 	"log"
 	"net"
 	"sync"
@@ -26,26 +27,26 @@ type Counter struct {
 	sync.Mutex
 	*time.Ticker
 	Tmp
-	Logname      string
-	watchSystem  bool
+	Logname     string
+	watchSystem bool
 }
 
-func (ctr *Counter) run(interval time.Duration) error {
+func (ctr *Counter) connect() error {
 	var err error
 	if ctr.Conn == nil {
 		ctr.Conn, err = net.Dial("udp", ctr.Udp)
 	}
+	return err
+}
 
+func (ctr *Counter) run(interval time.Duration) {
 	ctr.Ticker = time.NewTicker(interval)
 	go (func() {
 		for {
 			<-ctr.Ticker.C
-
 			ctr.Flush()
 		}
 	})()
-
-	return err
 }
 
 func (ctr *Counter) Flush() Tmp {
