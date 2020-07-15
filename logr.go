@@ -13,17 +13,25 @@ import (
 )
 
 const (
-	LevelDebug = "debug"
-	LevelInfo  = "info"
-	LevelWarn  = "warn"
-	LevelError = "error"
+	LevelEmerg  = "emerg"
+	LevelAlert  = "alert"
+	LevelCrit   = "crit"
+	LevelError  = "error"
+	LevelWarn   = "warn"
+	LevelNotice = "notice"
+	LevelInfo   = "info"
+	LevelDebug  = "debug"
 )
 
 var std = map[string]*os.File{
-	LevelDebug: os.Stdout,
-	LevelInfo:  os.Stdout,
-	LevelWarn:  os.Stderr,
-	LevelError: os.Stderr,
+	LevelEmerg:  os.Stderr,
+	LevelAlert:  os.Stderr,
+	LevelCrit:   os.Stderr,
+	LevelError:  os.Stderr,
+	LevelWarn:   os.Stderr,
+	LevelNotice: os.Stdout,
+	LevelInfo:   os.Stdout,
+	LevelDebug:  os.Stdout,
 }
 
 type Logger struct {
@@ -52,14 +60,20 @@ func (lg *Logger) prefix(level string) string {
 	dt := time.Now().Format(time.RFC3339)
 	flevel := level
 	switch level {
-	case LevelDebug:
-		flevel = color.New(color.FgBlue).SprintFunc()(level)
-	case LevelInfo:
-		flevel = color.New(color.FgGreen).SprintFunc()(level)
-	case LevelWarn:
-		flevel = color.New(color.FgYellow).SprintFunc()(level)
+	case LevelEmerg:
+	case LevelAlert:
+	case LevelCrit:
+		flevel = color.New(color.FgHiRed).SprintFunc()(level)
 	case LevelError:
 		flevel = color.New(color.FgRed).SprintFunc()(level)
+	case LevelWarn:
+		flevel = color.New(color.FgYellow).SprintFunc()(level)
+	case LevelNotice:
+		flevel = color.New(color.FgHiGreen).SprintFunc()(level)
+	case LevelInfo:
+		flevel = color.New(color.FgGreen).SprintFunc()(level)
+	case LevelDebug:
+		flevel = color.New(color.FgBlue).SprintFunc()(level)
 	}
 	res := lg.Prefix
 	res = strings.Replace(res, "{time}", dt, -1)
@@ -85,20 +99,36 @@ func format(vals ...interface{}) string {
 	}
 }
 
-func (lg *Logger) Debug(v ...interface{}) {
-	lg.Log(LevelDebug, v...)
+func (lg *Logger) Emerg(v ...interface{}) {
+	lg.Log(LevelEmerg, v...)
 }
 
-func (lg *Logger) Info(v ...interface{}) {
-	lg.Log(LevelInfo, v...)
+func (lg *Logger) Alert(v ...interface{}) {
+	lg.Log(LevelAlert, v...)
+}
+
+func (lg *Logger) Crit(v ...interface{}) {
+	lg.Log(LevelCrit, v...)
+}
+
+func (lg *Logger) Error(v ...interface{}) {
+	lg.Log(LevelError, v...)
 }
 
 func (lg *Logger) Warn(v ...interface{}) {
 	lg.Log(LevelWarn, v...)
 }
 
-func (lg *Logger) Error(v ...interface{}) {
-	lg.Log(LevelError, v...)
+func (lg *Logger) Notice(v ...interface{}) {
+	lg.Log(LevelNotice, v...)
+}
+
+func (lg *Logger) Info(v ...interface{}) {
+	lg.Log(LevelInfo, v...)
+}
+
+func (lg *Logger) Debug(v ...interface{}) {
+	lg.Log(LevelDebug, v...)
 }
 
 func (lg *Logger) Log(level string, v ...interface{}) {
