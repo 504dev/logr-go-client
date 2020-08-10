@@ -6,19 +6,24 @@
 
 ### Logger functions
 
-* Logger.Error
-* Logger.Warn
-* Logger.Info
-* Logger.Debug
+* `Logger.Emerg`
+* `Logger.Alert`
+* `Logger.Crit`
+* `Logger.Error`
+* `Logger.Warn`
+* `Logger.Notice`
+* `Logger.Info`
+* `Logger.Debug`
 
 ### Counter functions
 
-* Counter.Inc
-* Counter.Avg
-* Counter.Max
-* Counter.Min
-* Counter.Per
-* Counter.Time
+* `Counter.Inc`
+* `Counter.Avg`
+* `Counter.Max`
+* `Counter.Min`
+* `Counter.Per`
+* `Counter.Time`
+* `Counter.Widget` bonus method!
 
 
 Installing
@@ -43,7 +48,15 @@ func main() {
         PrivateKey: "MC0CAQACBQDIOyKzAgMBAAECBQCHaZwRAgMA0nkCAwDziwIDAL+xAgJMKwICGq0=",
     }
     logger, _ = conf.NewLogger("hello.log")
+
+    // Logger usage:
     logger.Info("Hello, Logr!")
+    logger.Debug("Wonderful!")
+
+    // Counter usage:
     logger.Inc("greeting", 1)
+
+    // Widget usage:
+    logger.Info("It's widget:", logr.Widget("inc", "greeting", 30))
 }
 ```
