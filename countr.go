@@ -30,43 +30,43 @@ type Counter struct {
 	watchSystem bool
 }
 
-func (ctr *Counter) connect() error {
+func (cntr *Counter) connect() error {
 	var err error
-	if ctr.Conn == nil {
-		ctr.Conn, err = net.Dial("udp", ctr.Udp)
+	if cntr.Conn == nil {
+		cntr.Conn, err = net.Dial("udp", cntr.Udp)
 	}
 	return err
 }
 
-func (ctr *Counter) run(interval time.Duration) {
-	ctr.Ticker = time.NewTicker(interval)
+func (cntr *Counter) run(interval time.Duration) {
+	cntr.Ticker = time.NewTicker(interval)
 	go (func() {
 		for {
-			<-ctr.Ticker.C
-			ctr.Flush()
+			<-cntr.Ticker.C
+			cntr.Flush()
 		}
 	})()
 }
 
-func (ctr *Counter) Flush() Tmp {
-	if ctr.watchSystem {
+func (cntr *Counter) Flush() Tmp {
+	if cntr.watchSystem {
 		l, _ := load.Avg()
 		m, _ := mem.VirtualMemory()
 		d, _ := disk.Usage("/")
 		c, _ := cpu.Percent(time.Second, true)
-		ctr.Avg("la", l.Load1)
-		ctr.Per("mem", float64(m.Used), float64(m.Total))
-		ctr.Per("disk", float64(d.Used), float64(d.Total))
+		cntr.Avg("la", l.Load1)
+		cntr.Per("mem", float64(m.Used), float64(m.Total))
+		cntr.Per("disk", float64(d.Used), float64(d.Total))
 		for _, v := range c {
-			ctr.Per("cpu", v, 100)
+			cntr.Per("cpu", v, 100)
 		}
 	}
-	ctr.Lock()
-	tmp := ctr.Tmp
-	ctr.Tmp = make(Tmp)
-	ctr.Unlock()
+	cntr.Lock()
+	tmp := cntr.Tmp
+	cntr.Tmp = make(Tmp)
+	cntr.Unlock()
 	for _, c := range tmp {
-		_, err := ctr.writeCount(c)
+		_, err := cntr.writeCount(c)
 		if err != nil {
 			log.Println(err)
 		}
@@ -74,69 +74,79 @@ func (ctr *Counter) Flush() Tmp {
 	return tmp
 }
 
-func (ctr *Counter) writeCount(count *types.Count) (int, error) {
-	if ctr.Conn == nil {
+func (cntr *Counter) writeCount(count *types.Count) (int, error) {
+	if cntr.Conn == nil {
 		return 0, nil
 	}
-	cipherText, err := count.Encrypt(ctr.PrivateKey)
+	cipherText, err := count.Encrypt(cntr.PrivateKey)
 	if err != nil {
 		return 0, err
 	}
 	lp := types.LogPackage{
-		DashId:      ctr.Config.DashId,
-		PublicKey:   ctr.Config.PublicKey,
+		DashId:      cntr.Config.DashId,
+		PublicKey:   cntr.Config.PublicKey,
 		CipherCount: cipherText,
 	}
 	msg, err := json.Marshal(lp)
 	if err != nil {
 		return 0, err
 	}
-	_, err = ctr.Conn.Write(msg)
+	_, err = cntr.Conn.Write(msg)
 	if err != nil {
 		return 0, err
 	}
 	return len(msg), nil
 }
 
-func (ctr *Counter) Touch(key string) *types.Count {
-	ctr.Lock()
-	if _, ok := ctr.Tmp[key]; !ok {
-		ctr.Tmp[key] = &types.Count{
-			DashId:   ctr.Config.DashId,
-			Hostname: ctr.GetHostname(),
-			Logname:  ctr.Logname,
+func (cntr *Counter) touch(key string) *types.Count {
+	if _, ok := cntr.Tmp[key]; !ok {
+		cntr.Tmp[key] = &types.Count{
+			DashId:   cntr.Config.DashId,
+			Hostname: cntr.GetHostname(),
+			Logname:  cntr.Logname,
 			Keyname:  key,
-			Version:  ctr.GetVersion(),
+			Version:  cntr.GetVersion(),
 		}
 	}
-	ctr.Unlock()
-	return ctr.Tmp[key]
+	return cntr.Tmp[key]
 }
-func (ctr *Counter) Inc(key string, num float64) *types.Count {
-	return ctr.Touch(key).Inc(num)
-}
-
-func (ctr *Counter) Max(key string, num float64) *types.Count {
-	return ctr.Touch(key).Max(num)
+func (cntr *Counter) Inc(key string, num float64) *types.Count {
+	cntr.Lock()
+	defer cntr.Unlock()
+	return cntr.touch(key).Inc(num)
 }
 
-func (ctr *Counter) Min(key string, num float64) *types.Count {
-	return ctr.Touch(key).Min(num)
+func (cntr *Counter) Max(key string, num float64) *types.Count {
+	cntr.Lock()
+	defer cntr.Unlock()
+	return cntr.touch(key).Max(num)
 }
 
-func (ctr *Counter) Avg(key string, num float64) *types.Count {
-	return ctr.Touch(key).Avg(num)
+func (cntr *Counter) Min(key string, num float64) *types.Count {
+	cntr.Lock()
+	defer cntr.Unlock()
+	return cntr.touch(key).Min(num)
 }
 
-func (ctr *Counter) Per(key string, taken float64, total float64) *types.Count {
-	return ctr.Touch(key).Per(taken, total)
+func (cntr *Counter) Avg(key string, num float64) *types.Count {
+	cntr.Lock()
+	defer cntr.Unlock()
+	return cntr.touch(key).Avg(num)
 }
 
-func (ctr *Counter) Time(key string, d time.Duration) func() time.Duration {
-	return ctr.Touch(key).Time(d)
+func (cntr *Counter) Per(key string, taken float64, total float64) *types.Count {
+	cntr.Lock()
+	defer cntr.Unlock()
+	return cntr.touch(key).Per(taken, total)
 }
 
-func (ctr *Counter) Widget(kind string, keyname string, limit int) string {
+func (cntr *Counter) Time(key string, d time.Duration) func() time.Duration {
+	cntr.Lock()
+	defer cntr.Unlock()
+	return cntr.touch(key).Time(d)
+}
+
+func (cntr *Counter) Widget(kind string, keyname string, limit int) string {
 	w := struct {
 		Widget   string `json:"widget"`
 		Logname  string `json:"logname"`
@@ -146,8 +156,8 @@ func (ctr *Counter) Widget(kind string, keyname string, limit int) string {
 		Limit    int    `json:"limit,omitempty"`
 	}{
 		"counter",
-		ctr.Logname,
-		ctr.GetHostname(),
+		cntr.Logname,
+		cntr.GetHostname(),
 		keyname,
 		kind,
 		limit,
@@ -156,6 +166,6 @@ func (ctr *Counter) Widget(kind string, keyname string, limit int) string {
 	return string(text)
 }
 
-func (ctr *Counter) WatchSystem() {
-	ctr.watchSystem = true
+func (cntr *Counter) WatchSystem() {
+	cntr.watchSystem = true
 }
