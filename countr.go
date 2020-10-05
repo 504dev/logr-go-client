@@ -98,7 +98,9 @@ func (cntr *Counter) writeCount(count *types.Count) (int, error) {
 	return len(msg), nil
 }
 
-func (cntr *Counter) touch(key string) *types.Count {
+func (cntr *Counter) Touch(key string) *types.Count {
+	cntr.Lock()
+	defer cntr.Unlock()
 	if _, ok := cntr.Tmp[key]; !ok {
 		cntr.Tmp[key] = &types.Count{
 			DashId:   cntr.Config.DashId,
@@ -111,39 +113,27 @@ func (cntr *Counter) touch(key string) *types.Count {
 	return cntr.Tmp[key]
 }
 func (cntr *Counter) Inc(key string, num float64) *types.Count {
-	cntr.Lock()
-	defer cntr.Unlock()
-	return cntr.touch(key).Inc(num)
+	return cntr.Touch(key).Inc(num)
 }
 
 func (cntr *Counter) Max(key string, num float64) *types.Count {
-	cntr.Lock()
-	defer cntr.Unlock()
-	return cntr.touch(key).Max(num)
+	return cntr.Touch(key).Max(num)
 }
 
 func (cntr *Counter) Min(key string, num float64) *types.Count {
-	cntr.Lock()
-	defer cntr.Unlock()
-	return cntr.touch(key).Min(num)
+	return cntr.Touch(key).Min(num)
 }
 
 func (cntr *Counter) Avg(key string, num float64) *types.Count {
-	cntr.Lock()
-	defer cntr.Unlock()
-	return cntr.touch(key).Avg(num)
+	return cntr.Touch(key).Avg(num)
 }
 
 func (cntr *Counter) Per(key string, taken float64, total float64) *types.Count {
-	cntr.Lock()
-	defer cntr.Unlock()
-	return cntr.touch(key).Per(taken, total)
+	return cntr.Touch(key).Per(taken, total)
 }
 
 func (cntr *Counter) Time(key string, d time.Duration) func() time.Duration {
-	cntr.Lock()
-	defer cntr.Unlock()
-	return cntr.touch(key).Time(d)
+	return cntr.Touch(key).Time(d)
 }
 
 func (cntr *Counter) Widget(kind string, keyname string, limit int) string {
