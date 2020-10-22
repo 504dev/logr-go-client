@@ -13,6 +13,7 @@ var commit = readCommit()
 var tag = readTag()
 
 type Config struct {
+	Console    bool
 	Udp        string
 	DashId     int
 	PublicKey  string

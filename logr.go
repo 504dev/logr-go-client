@@ -134,7 +134,9 @@ func (lg *Logger) Debug(v ...interface{}) {
 func (lg *Logger) Log(level string, v ...interface{}) {
 	prefix := lg.prefix(level)
 	body := lg.body(format(v...))
-	fmt.Fprintln(std[level], prefix+body)
+	if lg.Console {
+		fmt.Fprintln(std[level], prefix+body)
+	}
 	lg.writeLevel(level, body)
 }
 
