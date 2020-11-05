@@ -36,14 +36,32 @@ func (c *Config) NewLogger(logname string) (*Logger, error) {
 }
 
 func (c *Config) NewCounter(name string) (*Counter, error) {
-	ctr := &Counter{
+	cntr := &Counter{
 		Config:  c,
 		Logname: name,
 		Tmp:     make(map[string]*types.Count),
 	}
-	err := ctr.connect()
-	ctr.run(10 * time.Second)
-	return ctr, err
+	err := cntr.connect()
+	cntr.run(10 * time.Second)
+	return cntr, err
+}
+
+func (c *Config) DefaultSystemCounter() (*Counter, error) {
+	cntr, err := c.NewCounter("system.log")
+	if err != nil {
+		return nil, err
+	}
+	cntr.WatchSystem()
+	return cntr, nil
+}
+
+func (c *Config) DefaultProcessCounter() (*Counter, error) {
+	cntr, err := c.NewCounter("process.log")
+	if err != nil {
+		return nil, err
+	}
+	cntr.WatchProcess()
+	return cntr, nil
 }
 
 func (c *Config) GetHostname() string {

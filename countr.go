@@ -9,6 +9,7 @@ import (
 	"github.com/shirou/gopsutil/mem"
 	"log"
 	"net"
+	"runtime"
 	"sync"
 	"time"
 )
@@ -26,8 +27,9 @@ type Counter struct {
 	sync.Mutex
 	*time.Ticker
 	Tmp
-	Logname     string
-	watchSystem bool
+	Logname      string
+	watchSystem  bool
+	watchProcess bool
 }
 
 func (cntr *Counter) connect() error {
@@ -60,6 +62,13 @@ func (cntr *Counter) Flush() Tmp {
 		for _, v := range c {
 			cntr.Per("cpu", v, 100)
 		}
+	}
+	if cntr.watchProcess {
+		var ms runtime.MemStats
+		runtime.ReadMemStats(&ms)
+		cntr.Avg("runtime.NumGoroutine()", float64(runtime.NumGoroutine()))
+		cntr.Avg("runtime.MemStats.HeapAlloc", float64(ms.HeapAlloc))
+		cntr.Avg("runtime.MemStats.HeapObjects", float64(ms.HeapObjects))
 	}
 	cntr.Lock()
 	tmp := cntr.Tmp
@@ -158,4 +167,8 @@ func (cntr *Counter) Widget(kind string, keyname string, limit int) string {
 
 func (cntr *Counter) WatchSystem() {
 	cntr.watchSystem = true
+}
+
+func (cntr *Counter) WatchProcess() {
+	cntr.watchProcess = true
 }
