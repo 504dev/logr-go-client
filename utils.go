@@ -4,6 +4,7 @@ import (
 	"os/exec"
 	"regexp"
 	"runtime/debug"
+	"strconv"
 	"strings"
 )
 
@@ -33,4 +34,17 @@ func readTag() string {
 		return parts[len(parts)-2]
 	}
 	return ""
+}
+
+func HtopTime() float64 {
+	cmd := exec.Command("bash", "-c", "ps -eo time,pid | grep 47814")
+	stdout, err := cmd.Output()
+	if err != nil {
+		return 0
+	}
+	split := regexp.MustCompile("[\\s:]").Split(strings.TrimSpace(string(stdout)), -1)
+	min, _ := strconv.ParseFloat(split[0], 8)
+	sec, _ := strconv.ParseFloat(split[1], 8)
+	res := min*60 + sec
+	return res
 }

@@ -69,6 +69,9 @@ func (cntr *Counter) Flush() Tmp {
 		cntr.Avg("runtime.NumGoroutine()", float64(runtime.NumGoroutine()))
 		cntr.Avg("runtime.MemStats.HeapAlloc", float64(ms.HeapAlloc))
 		cntr.Avg("runtime.MemStats.HeapObjects", float64(ms.HeapObjects))
+		if htoptime := HtopTime(); htoptime > 0 {
+			cntr.Avg("htop.time", htoptime)
+		}
 	}
 	cntr.Lock()
 	tmp := cntr.Tmp
