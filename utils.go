@@ -52,6 +52,6 @@ func HtopTime() float64 {
 	hour, _ := strconv.ParseFloat(split[0], 8)
 	min, _ := strconv.ParseFloat(split[1], 8)
 	sec, _ := strconv.ParseFloat(split[2], 8)
-	res := hour*60*60 + min*60 + sec
+	res := (hour*60*60 + min*60 + sec) / 60
 	return res
 }
