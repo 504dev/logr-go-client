@@ -1,6 +1,8 @@
 package logr_go_client
 
 import (
+	"fmt"
+	"os"
 	"os/exec"
 	"regexp"
 	"runtime/debug"
@@ -37,7 +39,7 @@ func readTag() string {
 }
 
 func HtopTime() float64 {
-	cmd := exec.Command("bash", "-c", "ps -eo time,pid | grep 47814")
+	cmd := exec.Command("bash", "-c", fmt.Sprintf("ps -eo time,pid | grep %v", os.Getpid()))
 	stdout, err := cmd.Output()
 	if err != nil {
 		return 0
