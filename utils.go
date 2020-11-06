@@ -44,9 +44,14 @@ func HtopTime() float64 {
 	if err != nil {
 		return 0
 	}
-	split := regexp.MustCompile("[\\s:]").Split(strings.TrimSpace(string(stdout)), -1)
-	min, _ := strconv.ParseFloat(split[0], 8)
-	sec, _ := strconv.ParseFloat(split[1], 8)
-	res := min*60 + sec
+	text := strings.TrimSpace(string(stdout))
+	split := regexp.MustCompile("[\\s:]").Split(text, -1)
+	if len(split) < 4 {
+		split = append([]string{"0"}, split...)
+	}
+	hour, _ := strconv.ParseFloat(split[0], 8)
+	min, _ := strconv.ParseFloat(split[1], 8)
+	sec, _ := strconv.ParseFloat(split[2], 8)
+	res := hour*60*60 + min*60 + sec
 	return res
 }
