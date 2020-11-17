@@ -148,6 +148,22 @@ func (cntr *Counter) Time(key string, d time.Duration) func() time.Duration {
 	return cntr.Touch(key).Time(d)
 }
 
+func (cntr *Counter) Duration() func() time.Duration {
+	ts := time.Now()
+	return func() time.Duration {
+		delta := time.Since(ts)
+		ts = ts.Add(delta)
+		return delta
+	}
+}
+
+func (cntr *Counter) DurationFloat64(d time.Duration) func() float64 {
+	delta := cntr.Duration()
+	return func() float64 {
+		return float64(delta().Nanoseconds()) / float64(d.Nanoseconds())
+	}
+}
+
 func (cntr *Counter) Widget(kind string, keyname string, limit int) string {
 	w := struct {
 		Widget   string `json:"widget"`
