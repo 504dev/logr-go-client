@@ -149,8 +149,11 @@ func (cntr *Counter) Time(key string, d time.Duration) func() time.Duration {
 }
 
 func (cntr *Counter) Duration() func() time.Duration {
+	mtx := sync.Mutex{}
 	ts := time.Now()
 	return func() time.Duration {
+		mtx.Lock()
+		defer mtx.Unlock()
 		delta := time.Since(ts)
 		ts = ts.Add(delta)
 		return delta
@@ -160,7 +163,7 @@ func (cntr *Counter) Duration() func() time.Duration {
 func (cntr *Counter) DurationFloat64(d time.Duration) func() float64 {
 	delta := cntr.Duration()
 	return func() float64 {
-		return float64(delta().Nanoseconds()) / float64(d.Nanoseconds())
+		return float64(delta()) / float64(d)
 	}
 }
 
