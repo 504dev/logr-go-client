@@ -38,25 +38,35 @@ Usage
 package main
 
 import (
-    logr "github.com/504dev/logr-go-client"
+    logrc "github.com/504dev/logr-go-client"
+    "rand"
 )
 
 func main() {
-    conf := logr.Config{
+    conf := logrc.Config{
         Udp:        ":7776",
         PublicKey:  "MCAwDQYJKoZIhvcNAQEBBQADDwAwDAIFAMg7IrMCAwEAAQ",
         PrivateKey: "MC0CAQACBQDIOyKzAgMBAAECBQCHaZwRAgMA0nkCAwDziwIDAL+xAgJMKwICGq0=",
     }
     logger, _ = conf.NewLogger("hello.log")
+    logger.Level = logrc.LevelInfo
 
     // Logger usage:
     logger.Info("Hello, Logr!")
     logger.Debug("Wonderful!")
+    logger.Notice("Nice!")
 
     // Counter usage:
+    logger.WatchSystem()  // watch load average, cpu, memory, disk
+    logger.WatchProcess() // watch heap size, goroutines num
+    logger.Avg("random", rand.float64())
     logger.Inc("greeting", 1)
 
     // Widget usage:
-    logger.Info("It's widget:", logr.Widget("inc", "greeting", 30))
+    logger.Info("It's widget:", logr.Widget("avg", "random", 30))
+
+    // Disable console output
+    logger.Console = false
+    logger.Info("this message will not be printed to the console")
 }
 ```
