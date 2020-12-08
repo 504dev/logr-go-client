@@ -167,7 +167,7 @@ func (cntr *Counter) DurationFloat64(d time.Duration) func() float64 {
 	}
 }
 
-func (cntr *Counter) Widget(kind string, keyname string, limit int) string {
+func (cntr *Counter) Snippet(kind string, keyname string, limit int) string {
 	w := struct {
 		Widget   string `json:"widget"`
 		Logname  string `json:"logname"`

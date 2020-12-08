@@ -23,7 +23,7 @@
 * `Counter.Min`
 * `Counter.Per`
 * `Counter.Time`
-* `Counter.Widget` bonus method!
+* `Counter.Snippet` bonus method!
 
 
 Installing
@@ -62,8 +62,8 @@ func main() {
     logger.Avg("random", rand.float64())
     logger.Inc("greeting", 1)
 
-    // Widget usage:
-    logger.Info("It's widget:", logr.Widget("avg", "random", 30))
+    // Counter snippet usage:
+    logger.Info("It's counter snippet:", logr.Snippet("avg", "random", 30))
 
     // Disable console output
     logger.Console = false
