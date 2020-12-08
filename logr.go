@@ -23,6 +23,17 @@ const (
 	LevelDebug  = "debug"
 )
 
+var weights = map[string]int{
+	LevelEmerg:  7,
+	LevelAlert:  6,
+	LevelCrit:   5,
+	LevelError:  4,
+	LevelWarn:   3,
+	LevelNotice: 2,
+	LevelInfo:   1,
+	LevelDebug:  0,
+}
+
 var std = map[string]*os.File{
 	LevelEmerg:  os.Stderr,
 	LevelAlert:  os.Stderr,
@@ -40,6 +51,8 @@ type Logger struct {
 	Logname string
 	Body    string
 	Prefix  string
+	Level   string
+	Console bool
 	*Counter
 }
 
@@ -61,7 +74,9 @@ func (lg *Logger) prefix(level string) string {
 	flevel := level
 	switch level {
 	case LevelEmerg:
+		fallthrough
 	case LevelAlert:
+		fallthrough
 	case LevelCrit:
 		flevel = color.New(color.FgHiRed).SprintFunc()(level)
 	case LevelError:
@@ -132,6 +147,9 @@ func (lg *Logger) Debug(v ...interface{}) {
 }
 
 func (lg *Logger) Log(level string, v ...interface{}) {
+	if lg.Level != "" && weights[level] < weights[lg.Level] {
+		return
+	}
 	prefix := lg.prefix(level)
 	body := lg.body(format(v...))
 	if lg.Console {

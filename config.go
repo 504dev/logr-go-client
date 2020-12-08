@@ -13,7 +13,6 @@ var commit = readCommit()
 var tag = readTag()
 
 type Config struct {
-	Console    bool
 	Udp        string
 	DashId     int
 	PublicKey  string
@@ -30,6 +29,8 @@ func (c *Config) NewLogger(logname string) (*Logger, error) {
 		Prefix:  "{time} {level} ",
 		Body:    "[{version}, pid={pid}, {initiator}] {message}",
 		Conn:    conn,
+		Level:   LevelDebug,
+		Console: true,
 	}
 	res.Counter, _ = c.NewCounter(logname)
 	return res, err
