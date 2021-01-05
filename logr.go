@@ -181,14 +181,18 @@ func (lg *Logger) writeLog(log *types.Log) (int, error) {
 	if lg.Conn == nil {
 		return 0, nil
 	}
-	cipherLog, err := log.Encrypt(lg.PrivateKey)
-	if err != nil {
-		return 0, err
-	}
 	lp := types.LogPackage{
 		DashId:    lg.DashId,
 		PublicKey: lg.PublicKey,
-		CipherLog: cipherLog,
+		Log:       log,
+	}
+	if !lg.NoCipher {
+		cipherLog, err := log.Encrypt(lg.PrivateKey)
+		if err != nil {
+			return 0, err
+		}
+		lp.CipherLog = cipherLog
+		lp.Log = nil
 	}
 	msg, err := json.Marshal(lp)
 	if err != nil {

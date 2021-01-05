@@ -24,6 +24,8 @@ github.com/504dev/logr v0.0.9/go.mod h1:EodKYi1PTpBCExFz9NPCztDMU2VmvhP/iyMjRApU
 github.com/504dev/logr v0.0.14/go.mod h1:iA2J3Ehec6pMjvD70S97p8GoCvxJ4rAaRCBECADi/U8=
 github.com/504dev/logr v0.0.16 h1:R+2SVu0RVRnB/qHd/Lg0R1MHilzU8RXAYjd4c3sd3Y4=
 github.com/504dev/logr v0.0.16/go.mod h1:FOt9zPeYgKFz1KL0Xhm82THXHrX2wUALqAP+bCxm3xw=
+github.com/504dev/logr v0.0.37 h1:27EI8y3UInPQeZSMEBvohhIvgegsQRC/83xG2EFVGCM=
+github.com/504dev/logr v0.0.37/go.mod h1:r9zXw0PA8mUtz5XAuk1FQhpa7TE/UpPY2cKPPLonqJI=
 github.com/504dev/logr-go-client v0.0.22/go.mod h1:7z5SEZDcTjhYg+SC3X/iBnfGdJNmtvHpmzRqsHLMi4Q=
 github.com/504dev/logr-go-client v0.0.32/go.mod h1:oJrc/FVe713VZ1WfQYRYGpmHSUNFC4LLEV/8kRlaqek=
 github.com/504dev/logr-go-client v0.0.34/go.mod h1:zVv5mS5gA6O2Jt/7iF94KIlPjlP8D3BEST6k1cc1LmY=
@@ -31,6 +33,7 @@ github.com/504dev/logr-go-client v0.0.37/go.mod h1:G22IM9sDgANNkxR7uL3VACpwxRRG8
 github.com/504dev/logr-go-client v0.0.40/go.mod h1:+aOvsLLKZWi2PQgbwVU5zbG0Gl8rLXEWI4riPOw0+zA=
 github.com/504dev/logr-go-client v0.0.47/go.mod h1:0W+NIo6UAxtCJxUwp5O+4YKsJrz0JvJdexICtwVQ4cs=
 github.com/504dev/logr-go-client v0.0.48/go.mod h1:S9OkcyX1qxgqt86w2AWuaHt/9p8lkdqXRZolLSPjdYc=
+github.com/504dev/logr-go-client v0.0.60/go.mod h1:mqijj5Gi6BJhiR2FSEe7MaccwPK0LI2/EPoOhSTCtn4=
 github.com/ClickHouse/clickhouse-go v1.3.12/go.mod h1:EaI/sW7Azgz9UATzd5ZdZHRUhHgv5+JMS9NSr2smCJI=
 github.com/StackExchange/wmi v0.0.0-20190523213315-cbe66965904d h1:G0m3OIz70MZUWq3EgK3CesDbo8upS2Vm9/P3FtgI+Jk=
 github.com/StackExchange/wmi v0.0.0-20190523213315-cbe66965904d/go.mod h1:3eOhrUMpNV+6aFIbp5/iudMxNCF27Vw2OZgy4xEx0Fg=
@@ -41,6 +44,7 @@ github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSs
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/dgrijalva/jwt-go v3.2.0+incompatible h1:7qlOGliEKZXTDg6OTjfoBKDXWrumCAMpl/TFQ4/5kLM=
 github.com/dgrijalva/jwt-go v3.2.0+incompatible/go.mod h1:E3ru+11k8xSBh+hMPgOLZmtrrCbhqsmaPHjLKYnJCaQ=
+github.com/dustin/go-humanize v1.0.0/go.mod h1:HtrtbFcZ19U5GC7JDqmcUSB87Iq5E25KnS6fMYU6eOk=
 github.com/elazarl/go-bindata-assetfs v1.0.0/go.mod h1:v+YaWX3bdea5J/mo8dSETolEo7R71Vk1u8bnjau5yw4=
 github.com/fatih/color v1.9.0 h1:8xPHl4/q1VyqGIPif1F+1V3Y3lSmrq01EabUW3CoW5s=
 github.com/fatih/color v1.9.0/go.mod h1:eQcE1qtQxscV5RaZvpXrrb8Drkc3/DdQ+uUYCNjL+zU=

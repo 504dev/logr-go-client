@@ -19,6 +19,7 @@ type Config struct {
 	PrivateKey string
 	Hostname   string
 	Version    string
+	NoCipher   bool
 }
 
 func (c *Config) NewLogger(logname string) (*Logger, error) {

@@ -90,15 +90,20 @@ func (cntr *Counter) writeCount(count *types.Count) (int, error) {
 	if cntr.Conn == nil {
 		return 0, nil
 	}
-	cipherText, err := count.Encrypt(cntr.PrivateKey)
-	if err != nil {
-		return 0, err
-	}
 	lp := types.LogPackage{
-		DashId:      cntr.Config.DashId,
-		PublicKey:   cntr.Config.PublicKey,
-		CipherCount: cipherText,
+		DashId:    cntr.Config.DashId,
+		PublicKey: cntr.Config.PublicKey,
+		Count:     count,
 	}
+	if !cntr.NoCipher {
+		cipherText, err := count.Encrypt(cntr.PrivateKey)
+		if err != nil {
+			return 0, err
+		}
+		lp.CipherCount = cipherText
+		lp.Count = nil
+	}
+
 	msg, err := json.Marshal(lp)
 	if err != nil {
 		return 0, err
