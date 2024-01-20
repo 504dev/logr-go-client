@@ -1,7 +1,7 @@
 package logr_go_client
 
 import (
-	"github.com/504dev/logr/types"
+	"github.com/504dev/logr-go-client/types"
 )
 
 type Writter struct {

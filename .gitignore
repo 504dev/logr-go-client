@@ -1,3 +1,4 @@
 .idea
 cmd/
 vendor/
+.DS_Store

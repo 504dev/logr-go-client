@@ -2,7 +2,7 @@ package logr_go_client
 
 import (
 	"encoding/json"
-	"github.com/504dev/logr/types"
+	"github.com/504dev/logr-go-client/types"
 	"github.com/shirou/gopsutil/v3/cpu"
 	"github.com/shirou/gopsutil/v3/disk"
 	"github.com/shirou/gopsutil/v3/load"
