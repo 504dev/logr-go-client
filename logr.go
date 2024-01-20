@@ -1,7 +1,6 @@
 package logr_go_client
 
 import (
-	"encoding/json"
 	"fmt"
 	"github.com/504dev/logr-go-client/types"
 	"github.com/fatih/color"
@@ -44,6 +43,8 @@ var std = map[string]*os.File{
 	LevelInfo:   os.Stdout,
 	LevelDebug:  os.Stdout,
 }
+
+const MAX_MESSAGE_SIZE = 9000
 
 type Logger struct {
 	*Config
@@ -194,13 +195,18 @@ func (lg *Logger) writeLog(log *types.Log) (int, error) {
 		lp.CipherLog = cipherLog
 		lp.Log = nil
 	}
-	msg, err := json.Marshal(lp)
+
+	chunks, err := lp.Chunkify(MAX_MESSAGE_SIZE)
 	if err != nil {
 		return 0, err
 	}
-	_, err = lg.Conn.Write(msg)
-	if err != nil {
-		return 0, err
+
+	for i, chunk := range chunks {
+		_, err = lg.Conn.Write(chunk)
+		if err != nil {
+			return i, err
+		}
 	}
-	return len(msg), nil
+
+	return len(chunks), nil
 }
