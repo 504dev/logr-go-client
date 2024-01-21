@@ -52,10 +52,11 @@ func (lp *LogPackage) Chunkify(n int) ([][]byte, error) {
 	chunkSize := n - headSize
 	chunks := helpers.ChunkifyString(data, chunkSize)
 	result := make([][]byte, len(chunks))
+	uid := helpers.RandString(6)
 
 	for i, chunk := range chunks {
 		lpi := *lp
-		lpi.ChunkUid = helpers.RandString(6)
+		lpi.ChunkUid = uid
 		lpi.ChunkI = i
 		lpi.ChunkN = len(result)
 		lpi.CipherLog = chunk
