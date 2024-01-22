@@ -182,18 +182,23 @@ func (lg *Logger) writeLog(log *types.Log) (int, error) {
 	if lg.Conn == nil {
 		return 0, nil
 	}
+
 	lp := types.LogPackage{
 		DashId:    lg.DashId,
 		PublicKey: lg.PublicKey,
 		Log:       log,
 	}
-	if !lg.NoCipher {
-		cipherLog, err := log.Encrypt(lg.PrivateKey)
+
+	if lg.NoCipher {
+		err := lp.SerializeLog()
 		if err != nil {
 			return 0, err
 		}
-		lp.CipherLog = cipherLog
-		lp.Log = nil
+	} else {
+		err := lp.EncryptLog(lg.PrivateKey)
+		if err != nil {
+			return 0, err
+		}
 	}
 
 	chunks, err := lp.Chunkify(MAX_MESSAGE_SIZE)

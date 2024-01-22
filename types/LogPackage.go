@@ -6,17 +6,47 @@ import (
 )
 
 type LogPackage struct {
-	DashId      int    `json:"dash_id,omitempty"`
-	PublicKey   string `json:"public_key"`
-	CipherLog   string `json:"cipher_log,omitempty"`
-	CipherCount string `json:"cipher_count,omitempty"`
-	*Log        `json:"log,omitempty"`
+	DashId      int                    `json:"dash_id,omitempty"`
+	PublicKey   string                 `json:"public_key"`
+	CipherLog   string                 `json:"cipher_log,omitempty"`
+	CipherCount string                 `json:"cipher_count,omitempty"`
+	PlainLog    string                 `json:"_log,omitempty"`
+	*Log        `json:"log,omitempty"` // deprecated field, do not support long messages
 	*Count      `json:"count,omitempty"`
 	ChunkUid    string `json:"uid,omitempty"`
 	ChunkI      int    `json:"i,omitempty"`
 	ChunkN      int    `json:"n,omitempty"`
 }
 
+func (lp *LogPackage) SerializeLog() error {
+	msg, err := json.Marshal(lp.Log)
+	if err != nil {
+		return err
+	}
+	lp.PlainLog = string(msg)
+	lp.Log = nil
+	return nil
+}
+
+func (lp *LogPackage) DeserializeLog() error {
+	log := Log{}
+	err := json.Unmarshal([]byte(lp.PlainLog), &log)
+	if err != nil {
+		return err
+	}
+	lp.Log = &log
+	return nil
+}
+
+func (lp *LogPackage) EncryptLog(priv string) error {
+	cipherLog, err := lp.Log.Encrypt(priv)
+	if err != nil {
+		return err
+	}
+	lp.CipherLog = cipherLog
+	lp.Log = nil
+	return nil
+}
 func (lp *LogPackage) DecryptLog(priv string) error {
 	log := Log{}
 	err := log.Decrypt(lp.CipherLog, priv)
@@ -27,6 +57,15 @@ func (lp *LogPackage) DecryptLog(priv string) error {
 	return nil
 }
 
+func (lp *LogPackage) EncryptCount(priv string) error {
+	cipherText, err := lp.Count.Encrypt(priv)
+	if err != nil {
+		return err
+	}
+	lp.CipherCount = cipherText
+	lp.Count = nil
+	return nil
+}
 func (lp *LogPackage) DecryptCount(priv string) error {
 	count := Count{}
 	err := count.Decrypt(lp.CipherCount, priv)
@@ -43,11 +82,16 @@ func (lp *LogPackage) Chunkify(n int) ([][]byte, error) {
 		return nil, err
 	}
 
-	if len(msg) <= n || lp.CipherLog == "" {
+	if len(msg) <= n {
 		return [][]byte{msg}, err
 	}
 
-	data := lp.CipherLog
+	var data string
+	if lp.CipherLog != "" {
+		data = lp.CipherLog
+	} else {
+		data = lp.PlainLog
+	}
 	headSize := len(msg) - len(data)
 	chunkSize := n - headSize
 	chunks := helpers.ChunkifyString(data, chunkSize)
@@ -59,7 +103,11 @@ func (lp *LogPackage) Chunkify(n int) ([][]byte, error) {
 		lpi.ChunkUid = uid
 		lpi.ChunkI = i
 		lpi.ChunkN = len(result)
-		lpi.CipherLog = chunk
+		if lp.CipherLog != "" {
+			lpi.CipherLog = chunk
+		} else {
+			lpi.PlainLog = chunk
+		}
 		result[i], _ = json.Marshal(lpi)
 	}
 

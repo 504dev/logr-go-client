@@ -96,12 +96,10 @@ func (cntr *Counter) writeCount(count *types.Count) (int, error) {
 		Count:     count,
 	}
 	if !cntr.NoCipher {
-		cipherText, err := count.Encrypt(cntr.PrivateKey)
+		err := lp.EncryptCount(cntr.PrivateKey)
 		if err != nil {
 			return 0, err
 		}
-		lp.CipherCount = cipherText
-		lp.Count = nil
 	}
 
 	msg, err := json.Marshal(lp)
