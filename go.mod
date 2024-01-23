@@ -7,5 +7,4 @@ require (
 	github.com/fatih/color v1.9.0
 	github.com/shirou/gopsutil v2.20.9+incompatible
 	github.com/stretchr/testify v1.8.4 // indirect
-	github.com/tilinna/z85 v1.0.0
 )

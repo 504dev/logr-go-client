@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"github.com/504dev/logr-go-client/cipher"
 	"github.com/504dev/logr-go-client/helpers"
-	"github.com/tilinna/z85"
 	"time"
 )
 
@@ -32,25 +31,15 @@ func (lp *LogPackage) SerializeLog() error {
 	if err != nil {
 		return err
 	}
-	msg = helpers.AddSpacesToMakeMultipleOfN(msg, 4)
-	buf := make([]byte, z85.EncodedLen(len(msg)))
-	_, err = z85.Encode(buf, msg)
-	if err != nil {
-		return err
-	}
-	lp.PlainLog = string(buf)
+	lp.PlainLog = base64.StdEncoding.EncodeToString(msg)
 	lp.Log = nil
 	return nil
 }
 
 func (lp *LogPackage) DeserializeLog() error {
 	log := Log{}
-	buf := make([]byte, z85.DecodedLen(len(lp.PlainLog)))
-	_, err := z85.Decode(buf, []byte(lp.PlainLog))
-	if err != nil {
-		return err
-	}
-	err = json.Unmarshal(buf, &log)
+	decoded, _ := base64.StdEncoding.DecodeString(lp.PlainLog)
+	err := json.Unmarshal(decoded, &log)
 	if err != nil {
 		return err
 	}
@@ -126,7 +115,7 @@ func (lp *LogPackage) Chunkify(n int, priv string) ([][]byte, error) {
 	for i, chunk := range chunks {
 		lpi := *lp
 
-		err = lp.SignChunk(uid, i, len(result), priv)
+		err = lpi.SignChunk(uid, i, len(result), priv)
 		if err != nil {
 			return nil, err
 		}
