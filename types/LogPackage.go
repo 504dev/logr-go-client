@@ -87,7 +87,7 @@ func (lp *LogPackage) DecryptCount(priv string) error {
 
 func (lp *LogPackage) Chunkify(n int, priv string) ([][]byte, error) {
 	uid := helpers.RandString(6)
-	err := lp.SignChunk(uid, 0, 1, priv)
+	err := lp.Sign(uid, 0, 1, priv)
 	if err != nil {
 		return nil, err
 	}
@@ -115,7 +115,7 @@ func (lp *LogPackage) Chunkify(n int, priv string) ([][]byte, error) {
 	for i, chunk := range chunks {
 		lpi := *lp
 
-		err = lpi.SignChunk(uid, i, len(result), priv)
+		err = lpi.Sign(uid, i, len(result), priv)
 		if err != nil {
 			return nil, err
 		}
@@ -135,20 +135,28 @@ func (lp *LogPackage) Chunkify(n int, priv string) ([][]byte, error) {
 	return result, nil
 }
 
-func (lp *LogPackage) SignChunk(uid string, i int, n int, privBase64 string) error {
-	lp.Chunk.Uid = uid
-	lp.Chunk.I = i
-	lp.Chunk.N = n
-	lp.Chunk.Ts = time.Now().Unix()
+func (lp *LogPackage) CalcSig(privBase64 string) (signatureBase64 string, err error) {
 	privateKeyBytes, err := base64.StdEncoding.DecodeString(privBase64)
 	if err != nil {
-		return err
+		return "", err
 	}
 	message := fmt.Sprintf("%d|%s|%d|%d", lp.Chunk.Ts, lp.Chunk.Uid, lp.Chunk.I, lp.Chunk.N)
 	signature, err := cipher.EncryptAes([]byte(message), privateKeyBytes)
 	if err != nil {
+		return "", err
+	}
+	return base64.StdEncoding.EncodeToString(signature), nil
+}
+
+func (lp *LogPackage) Sign(uid string, i int, n int, privBase64 string) error {
+	lp.Chunk.Uid = uid
+	lp.Chunk.I = i
+	lp.Chunk.N = n
+	lp.Chunk.Ts = time.Now().Unix()
+	signature, err := lp.CalcSig(privBase64)
+	if err != nil {
 		return err
 	}
-	lp.Sig = base64.StdEncoding.EncodeToString(signature)
+	lp.Sig = signature
 	return nil
 }
