@@ -201,7 +201,7 @@ func (lg *Logger) writeLog(log *types.Log) (int, error) {
 		}
 	}
 
-	chunks, err := lp.Chunkify(MAX_MESSAGE_SIZE)
+	chunks, err := lp.Chunkify(MAX_MESSAGE_SIZE, lg.PrivateKey)
 	if err != nil {
 		return 0, err
 	}

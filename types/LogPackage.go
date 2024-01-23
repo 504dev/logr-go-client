@@ -3,7 +3,11 @@ package types
 import (
 	"encoding/base64"
 	"encoding/json"
+	"fmt"
+	"github.com/504dev/logr-go-client/cipher"
 	"github.com/504dev/logr-go-client/helpers"
+	"github.com/tilinna/z85"
+	"time"
 )
 
 type LogPackage struct {
@@ -14,9 +18,13 @@ type LogPackage struct {
 	PlainLog    string                 `json:"_log,omitempty"`
 	*Log        `json:"log,omitempty"` // deprecated field, do not support long messages
 	*Count      `json:"count,omitempty"`
-	ChunkUid    string `json:"uid,omitempty"`
-	ChunkI      int    `json:"i,omitempty"`
-	ChunkN      int    `json:"n,omitempty"`
+	Sig         string `json:"sig,omitempty"`
+	Chunk       struct {
+		Uid string `json:"uid,omitempty"`
+		Ts  int64  `json:"ts,omitempty"`
+		I   int    `json:"i,omitempty"`
+		N   int    `json:"n,omitempty"`
+	} `json:"chunk"`
 }
 
 func (lp *LogPackage) SerializeLog() error {
@@ -24,15 +32,25 @@ func (lp *LogPackage) SerializeLog() error {
 	if err != nil {
 		return err
 	}
-	lp.PlainLog = base64.StdEncoding.EncodeToString(msg)
+	msg = helpers.AddSpacesToMakeMultipleOfN(msg, 4)
+	buf := make([]byte, z85.EncodedLen(len(msg)))
+	_, err = z85.Encode(buf, msg)
+	if err != nil {
+		return err
+	}
+	lp.PlainLog = string(buf)
 	lp.Log = nil
 	return nil
 }
 
 func (lp *LogPackage) DeserializeLog() error {
 	log := Log{}
-	decoded, _ := base64.StdEncoding.DecodeString(lp.PlainLog)
-	err := json.Unmarshal(decoded, &log)
+	buf := make([]byte, z85.DecodedLen(len(lp.PlainLog)))
+	_, err := z85.Decode(buf, []byte(lp.PlainLog))
+	if err != nil {
+		return err
+	}
+	err = json.Unmarshal(buf, &log)
 	if err != nil {
 		return err
 	}
@@ -78,7 +96,13 @@ func (lp *LogPackage) DecryptCount(priv string) error {
 	return nil
 }
 
-func (lp *LogPackage) Chunkify(n int) ([][]byte, error) {
+func (lp *LogPackage) Chunkify(n int, priv string) ([][]byte, error) {
+	uid := helpers.RandString(6)
+	err := lp.SignChunk(uid, 0, 1, priv)
+	if err != nil {
+		return nil, err
+	}
+
 	msg, err := json.Marshal(lp)
 	if err != nil {
 		return nil, err
@@ -98,20 +122,44 @@ func (lp *LogPackage) Chunkify(n int) ([][]byte, error) {
 	chunkSize := n - headSize
 	chunks := helpers.ChunkifyString(data, chunkSize)
 	result := make([][]byte, len(chunks))
-	uid := helpers.RandString(6)
 
 	for i, chunk := range chunks {
 		lpi := *lp
-		lpi.ChunkUid = uid
-		lpi.ChunkI = i
-		lpi.ChunkN = len(result)
+
+		err = lp.SignChunk(uid, i, len(result), priv)
+		if err != nil {
+			return nil, err
+		}
+
 		if lp.CipherLog != "" {
 			lpi.CipherLog = chunk
 		} else {
 			lpi.PlainLog = chunk
 		}
-		result[i], _ = json.Marshal(lpi)
+
+		result[i], err = json.Marshal(lpi)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	return result, nil
+}
+
+func (lp *LogPackage) SignChunk(uid string, i int, n int, privBase64 string) error {
+	lp.Chunk.Uid = uid
+	lp.Chunk.I = i
+	lp.Chunk.N = n
+	lp.Chunk.Ts = time.Now().Unix()
+	privateKeyBytes, err := base64.StdEncoding.DecodeString(privBase64)
+	if err != nil {
+		return err
+	}
+	message := fmt.Sprintf("%d|%s|%d|%d", lp.Chunk.Ts, lp.Chunk.Uid, lp.Chunk.I, lp.Chunk.N)
+	signature, err := cipher.EncryptAes([]byte(message), privateKeyBytes)
+	if err != nil {
+		return err
+	}
+	lp.Sig = base64.StdEncoding.EncodeToString(signature)
+	return nil
 }

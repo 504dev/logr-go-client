@@ -28,3 +28,13 @@ func ChunkifyString(input string, length int) []string {
 	}
 	return result
 }
+
+func AddSpacesToMakeMultipleOfN(inputBytes []byte, n int) []byte {
+	spacesToAdd := n - (len(inputBytes) % n) // Calculate the number of spaces to add
+	if spacesToAdd != n {
+		for i := 0; i < spacesToAdd; i++ {
+			inputBytes = append(inputBytes, ' ') // Add spaces to the byte slice
+		}
+	}
+	return inputBytes
+}
