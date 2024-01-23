@@ -1,6 +1,7 @@
 package types
 
 import (
+	"encoding/base64"
 	"encoding/json"
 	"github.com/504dev/logr-go-client/helpers"
 )
@@ -23,14 +24,15 @@ func (lp *LogPackage) SerializeLog() error {
 	if err != nil {
 		return err
 	}
-	lp.PlainLog = string(msg)
+	lp.PlainLog = base64.StdEncoding.EncodeToString(msg)
 	lp.Log = nil
 	return nil
 }
 
 func (lp *LogPackage) DeserializeLog() error {
 	log := Log{}
-	err := json.Unmarshal([]byte(lp.PlainLog), &log)
+	decoded, _ := base64.StdEncoding.DecodeString(lp.PlainLog)
+	err := json.Unmarshal(decoded, &log)
 	if err != nil {
 		return err
 	}
