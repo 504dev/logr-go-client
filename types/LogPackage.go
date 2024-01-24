@@ -145,6 +145,7 @@ func (lp *LogPackage) CalcSig(privBase64 string) (signatureBase64 string, err er
 	if err != nil {
 		return "", err
 	}
+	fmt.Printf("\n____DEBUG %v %v %v %v \n\n", privBase64, message, base64.StdEncoding.EncodeToString(signature), lp.Chunk)
 	return base64.StdEncoding.EncodeToString(signature), nil
 }
 
