@@ -60,6 +60,21 @@ func EncryptAes(plainText []byte, key []byte) ([]byte, error) {
 	return cipherText, err
 }
 
+func EncryptAesIv(plainText []byte, key []byte, iv []byte) ([]byte, error) {
+	hash := sha256.Sum256(key)
+	block, err := aes.NewCipher(hash[:])
+	if err != nil {
+		return nil, err
+	}
+	salt := sha256.Sum256(iv)
+	iv = salt[:aes.BlockSize]
+	cipherText := append(iv, make([]byte, len(plainText))...)
+	stream := cipher.NewCFBEncrypter(block, iv)
+	stream.XORKeyStream(cipherText[aes.BlockSize:], plainText)
+
+	return cipherText, err
+}
+
 func DecryptAes(cipherText []byte, key []byte) ([]byte, error) {
 	hash := sha256.Sum256(key)
 	block, err := aes.NewCipher(hash[:])

@@ -141,11 +141,11 @@ func (lp *LogPackage) CalcSig(privBase64 string) (signatureBase64 string, err er
 		return "", err
 	}
 	message := fmt.Sprintf("%d|%s|%d|%d", lp.Chunk.Ts, lp.Chunk.Uid, lp.Chunk.I, lp.Chunk.N)
-	signature, err := cipher.EncryptAes([]byte(message), privateKeyBytes)
+	signature, err := cipher.EncryptAesIv([]byte(message), privateKeyBytes, []byte(lp.Chunk.Uid))
 	if err != nil {
 		return "", err
 	}
-	fmt.Printf("\n____DEBUG %v %v %v %v \n\n", privBase64, message, base64.StdEncoding.EncodeToString(signature), lp.Chunk)
+
 	return base64.StdEncoding.EncodeToString(signature), nil
 }
 
