@@ -9,6 +9,27 @@ import (
 	"time"
 )
 
+type ChunkInfo struct {
+	Uid string `json:"uid,omitempty"`
+	Ts  int64  `json:"ts,omitempty"`
+	I   int    `json:"i,omitempty"`
+	N   int    `json:"n,omitempty"`
+}
+
+func (ch *ChunkInfo) CalcSig(privBase64 string) (signatureBase64 string, err error) {
+	privateKeyBytes, err := base64.StdEncoding.DecodeString(privBase64)
+	if err != nil {
+		return "", err
+	}
+	message := fmt.Sprintf("%d|%s|%d|%d", ch.Ts, ch.Uid, ch.I, ch.N)
+	signature, err := cipher.EncryptAesIv([]byte(message), privateKeyBytes, []byte(ch.Uid))
+	if err != nil {
+		return "", err
+	}
+
+	return base64.StdEncoding.EncodeToString(signature), nil
+}
+
 type LogPackage struct {
 	DashId      int                    `json:"dash_id,omitempty"`
 	PublicKey   string                 `json:"public_key"`
@@ -17,13 +38,8 @@ type LogPackage struct {
 	PlainLog    string                 `json:"_log,omitempty"`
 	*Log        `json:"log,omitempty"` // deprecated field, do not support long messages
 	*Count      `json:"count,omitempty"`
-	Sig         string `json:"sig,omitempty"`
-	Chunk       struct {
-		Uid string `json:"uid,omitempty"`
-		Ts  int64  `json:"ts,omitempty"`
-		I   int    `json:"i,omitempty"`
-		N   int    `json:"n,omitempty"`
-	} `json:"chunk"`
+	Sig         string     `json:"sig,omitempty"`
+	Chunk       *ChunkInfo `json:"chunk"`
 }
 
 func (lp *LogPackage) SerializeLog() error {
@@ -135,29 +151,18 @@ func (lp *LogPackage) Chunkify(n int, priv string) ([][]byte, error) {
 	return result, nil
 }
 
-func (lp *LogPackage) CalcSig(privBase64 string) (signatureBase64 string, err error) {
-	privateKeyBytes, err := base64.StdEncoding.DecodeString(privBase64)
-	if err != nil {
-		return "", err
-	}
-	message := fmt.Sprintf("%d|%s|%d|%d", lp.Chunk.Ts, lp.Chunk.Uid, lp.Chunk.I, lp.Chunk.N)
-	signature, err := cipher.EncryptAesIv([]byte(message), privateKeyBytes, []byte(lp.Chunk.Uid))
-	if err != nil {
-		return "", err
-	}
-
-	return base64.StdEncoding.EncodeToString(signature), nil
-}
-
 func (lp *LogPackage) Sign(uid string, i int, n int, privBase64 string) error {
-	lp.Chunk.Uid = uid
-	lp.Chunk.I = i
-	lp.Chunk.N = n
-	lp.Chunk.Ts = time.Now().Unix()
-	signature, err := lp.CalcSig(privBase64)
+	chunkInfo := &ChunkInfo{
+		Uid: uid,
+		Ts:  time.Now().Unix(),
+		I:   i,
+		N:   n,
+	}
+	signature, err := chunkInfo.CalcSig(privBase64)
 	if err != nil {
 		return err
 	}
+	lp.Chunk = chunkInfo
 	lp.Sig = signature
 	return nil
 }
