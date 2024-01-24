@@ -3,6 +3,7 @@ package types
 import (
 	"encoding/base64"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/504dev/logr-go-client/cipher"
 	"github.com/504dev/logr-go-client/helpers"
@@ -17,6 +18,9 @@ type ChunkInfo struct {
 }
 
 func (ch *ChunkInfo) CalcSig(privBase64 string) (signatureBase64 string, err error) {
+	if ch.N == 0 || ch.I >= ch.N || len(ch.Uid) < 6 {
+		return "", errors.New("bad arguments")
+	}
 	privateKeyBytes, err := base64.StdEncoding.DecodeString(privBase64)
 	if err != nil {
 		return "", err
