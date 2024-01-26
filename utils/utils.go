@@ -8,26 +8,28 @@ import (
 )
 
 func ReadGitCommit() string {
-	return ReadGitCommitTag("")
+	return ReadGitCommitDir("")
 }
-func ReadGitCommitTag(dir string) string {
+
+func ReadGitCommitDir(dir string) string {
 	cmd := exec.Command("git", "rev-parse", "HEAD")
 	cmd.Dir = dir
 	stdout, _ := cmd.Output()
+	commit := strings.TrimSuffix(string(stdout), "\n")
 
-	return string(stdout)
+	return commit
 }
 
 func ReadGitTag() string {
 	return ReadGitTagDir("")
 }
+
 func ReadGitTagDir(dir string) string {
 	cmd := exec.Command("git", "tag", "-l", "--points-at", "HEAD")
 	cmd.Dir = dir
 	stdout, _ := cmd.Output()
 	tmp := string(stdout)
 	parts := strings.Split(tmp, "\n")
-
 	if len(parts) > 1 {
 		return parts[len(parts)-2]
 	}
