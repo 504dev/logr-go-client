@@ -199,6 +199,8 @@ func (cntr *Counter) collectProcessInfo() {
 	var memState runtime.MemStats
 	runtime.ReadMemStats(&memState)
 	cntr.Avg("runtime.NumGoroutine()", float64(runtime.NumGoroutine()))
+	cntr.Avg("runtime.ReadMemStats().NumGC", float64(memState.NumGC))
+	cntr.Avg("runtime.ReadMemStats().TotalAlloc", float64(memState.TotalAlloc))
 	cntr.Avg("runtime.ReadMemStats().HeapAlloc", float64(memState.HeapAlloc))
 	cntr.Avg("runtime.ReadMemStats().HeapObjects", float64(memState.HeapObjects))
 	if cpuPercent, err := proc.CPUPercent(); err == nil {
