@@ -216,7 +216,7 @@ func (cntr *Counter) collectProcessInfo() {
 		cntr.Avg("process.MemoryInfo().rss", float64(memoryInfo.RSS))
 		cntr.Avg("process.MemoryInfo().vms", float64(memoryInfo.VMS))
 	}
-	cntr.Avg("execTime", time.Now().Sub(ts).Seconds())
+	cntr.Avg("execTime", time.Now().Sub(ts).Minutes())
 }
 
 func (cntr *Counter) WatchProcess() {
