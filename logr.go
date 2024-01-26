@@ -3,6 +3,7 @@ package logr_go_client
 import (
 	"fmt"
 	"github.com/504dev/logr-go-client/types"
+	"github.com/504dev/logr-go-client/utils"
 	"github.com/fatih/color"
 	"net"
 	"os"
@@ -101,7 +102,7 @@ func (lg *Logger) body(msg string) string {
 	res := lg.Body
 	res = strings.Replace(res, "{version}", lg.GetVersion(), -1)
 	res = strings.Replace(res, "{pid}", strconv.Itoa(lg.GetPid()), -1)
-	res = strings.Replace(res, "{initiator}", initiator(), -1)
+	res = strings.Replace(res, "{initiator}", utils.Initiator(), -1)
 	res = strings.Replace(res, "{message}", msg, -1)
 	return res
 }

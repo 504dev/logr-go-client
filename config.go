@@ -2,6 +2,7 @@ package logr_go_client
 
 import (
 	"github.com/504dev/logr-go-client/types"
+	"github.com/504dev/logr-go-client/utils"
 	"net"
 	"os"
 	"time"
@@ -9,8 +10,8 @@ import (
 
 var hostname, _ = os.Hostname()
 var pid = os.Getpid()
-var commit = readCommit()
-var tag = readTag()
+var commit = utils.ReadGitCommit()
+var tag = utils.ReadGitTag()
 
 type Config struct {
 	Udp        string
