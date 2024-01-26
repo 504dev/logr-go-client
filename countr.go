@@ -7,12 +7,16 @@ import (
 	"github.com/shirou/gopsutil/disk"
 	"github.com/shirou/gopsutil/load"
 	"github.com/shirou/gopsutil/mem"
+	"github.com/shirou/gopsutil/process"
 	"log"
 	"net"
+	"os"
 	"runtime"
 	"sync"
 	"time"
 )
+
+var ts = time.Now()
 
 type Tmp map[string]*types.Count
 
@@ -52,26 +56,10 @@ func (cntr *Counter) run(interval time.Duration) {
 
 func (cntr *Counter) Flush() Tmp {
 	if cntr.watchSystem {
-		l, _ := load.Avg()
-		m, _ := mem.VirtualMemory()
-		d, _ := disk.Usage("/")
-		c, _ := cpu.Percent(time.Second, true)
-		cntr.Avg("la", l.Load1)
-		cntr.Per("mem", float64(m.Used), float64(m.Total))
-		cntr.Per("disk", float64(d.Used), float64(d.Total))
-		for _, v := range c {
-			cntr.Per("cpu", v, 100)
-		}
+		cntr.collectSystemInfo()
 	}
 	if cntr.watchProcess {
-		var ms runtime.MemStats
-		runtime.ReadMemStats(&ms)
-		cntr.Avg("runtime.NumGoroutine()", float64(runtime.NumGoroutine()))
-		cntr.Avg("runtime.MemStats.HeapAlloc", float64(ms.HeapAlloc))
-		cntr.Avg("runtime.MemStats.HeapObjects", float64(ms.HeapObjects))
-		if htoptime := HtopTime(); htoptime > 0 {
-			cntr.Avg("htop.time", htoptime)
-		}
+		cntr.collectProcessInfo()
 	}
 	cntr.Lock()
 	tmp := cntr.Tmp
@@ -190,8 +178,43 @@ func (cntr *Counter) Snippet(kind string, keyname string, limit int) string {
 	return string(text)
 }
 
+func (cntr *Counter) collectSystemInfo() {
+	l, _ := load.Avg()
+	m, _ := mem.VirtualMemory()
+	d, _ := disk.Usage("/")
+	c, _ := cpu.Percent(time.Second, true)
+	cntr.Avg("la", l.Load1)
+	cntr.Per("mem", float64(m.Used), float64(m.Total))
+	cntr.Per("disk", float64(d.Used), float64(d.Total))
+	for _, v := range c {
+		cntr.Per("cpu", v, 100)
+	}
+}
 func (cntr *Counter) WatchSystem() {
 	cntr.watchSystem = true
+}
+
+func (cntr *Counter) collectProcessInfo() {
+	proc := process.Process{Pid: int32(os.Getpid())}
+	var memState runtime.MemStats
+	runtime.ReadMemStats(&memState)
+	cntr.Avg("runtime.NumGoroutine()", float64(runtime.NumGoroutine()))
+	cntr.Avg("runtime.ReadMemStats().HeapAlloc", float64(memState.HeapAlloc))
+	cntr.Avg("runtime.ReadMemStats().HeapObjects", float64(memState.HeapObjects))
+	if cpuPercent, err := proc.CPUPercent(); err == nil {
+		cntr.Avg("process.CPUPercent()", cpuPercent)
+	}
+	if numThreads, err := proc.NumThreads(); err == nil {
+		cntr.Avg("process.NumThreads()", float64(numThreads))
+	}
+	if memoryPercent, err := proc.MemoryPercent(); err == nil {
+		cntr.Avg("process.MemoryPercent()", float64(memoryPercent))
+	}
+	if memoryInfo, err := proc.MemoryInfo(); err == nil {
+		cntr.Avg("process.MemoryInfo().rss", float64(memoryInfo.RSS))
+		cntr.Avg("process.MemoryInfo().vms", float64(memoryInfo.VMS))
+	}
+	cntr.Avg("execTime", ts.Sub(ts).Seconds())
 }
 
 func (cntr *Counter) WatchProcess() {
