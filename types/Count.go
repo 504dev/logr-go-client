@@ -72,7 +72,7 @@ func (c *Count) Inc(num float64) *Count {
 	if c.Metrics.Inc == nil {
 		c.Metrics.Inc = &Inc{}
 	}
-	c.Metrics.Inc.Val += num - c.Metrics.Inc.Val
+	c.Metrics.Inc.Val += num - c.Metrics.Inc.Prev
 	c.now()
 	return c
 }
@@ -159,7 +159,7 @@ func (c *Count) Time(duration time.Duration) func() time.Duration {
 
 type Inc struct {
 	Val  float64 `db:"inc,omitempty" json:"inc,omitempty"`
-	Prev float64
+	Prev float64 `db:"-" json:"-"`
 }
 
 type Max struct {
