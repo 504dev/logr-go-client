@@ -143,11 +143,16 @@ func (co *Counter) DeltaInc(key string, num float64) *types.Count {
 	return co.Inc(key, num)
 }
 func (co *Counter) DeltaInc2(key string, num float64) *types.Count {
-	co.Touch(key).PrevInc(num)
-	if prev := co.prevInc(key); prev != nil {
-		num -= prev.Prev
+	res, newone := co.touchSafe(key)
+	if newone { // TODO not newone, maybe zero
+		if prev := co.prevInc(key); prev != nil {
+			res.PrevInc(prev.Prev)
+		} else {
+			return res.PrevInc(num)
+		}
 	}
-	return co.Inc(key, num)
+
+	return res.Inc(num).PrevInc(num)
 }
 
 func (co *Counter) prevInc(key string) *types.Inc {

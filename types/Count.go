@@ -72,7 +72,7 @@ func (c *Count) Inc(num float64) *Count {
 	if c.Metrics.Inc == nil {
 		c.Metrics.Inc = &Inc{}
 	}
-	c.Metrics.Inc.Val += num
+	c.Metrics.Inc.Val += num - c.Metrics.Inc.Val
 	c.now()
 	return c
 }
@@ -185,7 +185,7 @@ type Time struct {
 }
 
 func (i *Inc) Value() float64 {
-	return i.Val
+	return i.Val - i.Prev
 }
 
 func (m *Max) Value() float64 {
