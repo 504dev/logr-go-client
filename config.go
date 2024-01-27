@@ -42,7 +42,7 @@ func (c *Config) NewCounter(name string) (*Counter, error) {
 	cntr := &Counter{
 		Config:  c,
 		Logname: name,
-		Tmp:     make(map[string]*types.Count),
+		State:   make(map[string]*types.Count),
 	}
 	err := cntr.connect()
 	cntr.run(10 * time.Second)

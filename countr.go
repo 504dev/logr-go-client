@@ -19,9 +19,9 @@ import (
 
 var ts = time.Now()
 
-type Tmp map[string]*types.Count
+type State map[string]*types.Count
 
-func (cm Tmp) String() string {
+func (cm State) String() string {
 	text, _ := json.MarshalIndent(cm, "", "  ")
 	return string(text)
 }
@@ -29,63 +29,80 @@ func (cm Tmp) String() string {
 type Counter struct {
 	*Config
 	net.Conn
-	sync.Mutex
+	sync.RWMutex
 	*time.Ticker
-	Tmp
+	State
+	statePrev    State
 	Logname      string
 	watchSystem  bool
 	watchProcess bool
+	flushedAt    time.Time
 }
 
-func (cntr *Counter) connect() error {
+func (co *Counter) connect() error {
 	var err error
-	if cntr.Conn == nil {
-		cntr.Conn, err = net.Dial("udp", cntr.Udp)
+	if co.Conn == nil {
+		co.Conn, err = net.Dial("udp", co.Config.Udp)
 	}
 	return err
 }
 
-func (cntr *Counter) run(interval time.Duration) {
-	cntr.Ticker = time.NewTicker(interval)
+func (co *Counter) run(interval time.Duration) {
+	co.Ticker = time.NewTicker(interval)
 	go (func() {
 		for {
-			<-cntr.Ticker.C
-			cntr.Flush()
+			<-co.Ticker.C
+			co.Flush()
 		}
 	})()
 }
 
-func (cntr *Counter) Flush() Tmp {
-	if cntr.watchSystem {
-		cntr.collectSystemInfo()
+func (co *Counter) getFlushedAt() time.Time {
+	co.RLock()
+	defer co.RUnlock()
+	return co.flushedAt
+}
+
+func (co *Counter) Flush() State {
+	ts := time.Now()
+	if co.watchSystem {
+		co.collectSystemInfo()
 	}
-	if cntr.watchProcess {
-		cntr.collectProcessInfo()
+	if co.watchProcess {
+		co.collectProcessInfo()
 	}
-	cntr.Lock()
-	tmp := cntr.Tmp
-	cntr.Tmp = make(Tmp)
-	cntr.Unlock()
-	for _, c := range tmp {
-		_, err := cntr.writeCount(c)
-		if err != nil {
-			log.Println(err)
+
+	co.Lock()
+	defer co.Unlock()
+
+	tmp := co.State
+	co.statePrev = tmp
+	co.State = make(State)
+	co.flushedAt = ts
+
+	go func() {
+		for _, c := range tmp {
+			_, err := co.writeCount(c)
+			if err != nil {
+				log.Println(err)
+			}
 		}
-	}
+	}()
+
 	return tmp
 }
 
-func (cntr *Counter) writeCount(count *types.Count) (int, error) {
-	if cntr.Conn == nil {
+func (co *Counter) writeCount(count *types.Count) (int, error) {
+	if co.Conn == nil {
 		return 0, nil
 	}
 	lp := types.LogPackage{
-		DashId:    cntr.Config.DashId,
-		PublicKey: cntr.Config.PublicKey,
+		DashId:    co.Config.DashId,
+		PublicKey: co.Config.PublicKey,
 		Count:     count,
 	}
-	if !cntr.NoCipher {
-		err := lp.EncryptCount(cntr.PrivateKey)
+	if !co.Config.NoCipher {
+		err := lp.EncryptCount(co.Config.PrivateKey)
 		if err != nil {
 			return 0, err
 		}
@@ -95,52 +112,52 @@ func (cntr *Counter) writeCount(count *types.Count) (int, error) {
 	if err != nil {
 		return 0, err
 	}
-	_, err = cntr.Conn.Write(msg)
+	_, err = co.Conn.Write(msg)
 	if err != nil {
 		return 0, err
 	}
 	return len(msg), nil
 }
 
-func (cntr *Counter) Touch(key string) *types.Count {
-	cntr.Lock()
-	defer cntr.Unlock()
-	if _, ok := cntr.Tmp[key]; !ok {
-		cntr.Tmp[key] = &types.Count{
-			DashId:   cntr.Config.DashId,
-			Hostname: cntr.GetHostname(),
-			Logname:  cntr.Logname,
+func (co *Counter) Touch(key string) *types.Count {
+	co.Lock()
+	defer co.Unlock()
+	if _, ok := co.State[key]; !ok {
+		co.State[key] = &types.Count{
+			DashId:   co.Config.DashId,
+			Hostname: co.GetHostname(),
+			Logname:  co.Logname,
 			Keyname:  key,
-			Version:  cntr.GetVersion(),
+			Version:  co.GetVersion(),
 		}
 	}
-	return cntr.Tmp[key]
+	return co.State[key]
 }
-func (cntr *Counter) Inc(key string, num float64) *types.Count {
-	return cntr.Touch(key).Inc(num)
-}
-
-func (cntr *Counter) Max(key string, num float64) *types.Count {
-	return cntr.Touch(key).Max(num)
+func (co *Counter) Inc(key string, num float64) *types.Count {
+	return co.Touch(key).Inc(num)
 }
 
-func (cntr *Counter) Min(key string, num float64) *types.Count {
-	return cntr.Touch(key).Min(num)
+func (co *Counter) Max(key string, num float64) *types.Count {
+	return co.Touch(key).Max(num)
 }
 
-func (cntr *Counter) Avg(key string, num float64) *types.Count {
-	return cntr.Touch(key).Avg(num)
+func (co *Counter) Min(key string, num float64) *types.Count {
+	return co.Touch(key).Min(num)
 }
 
-func (cntr *Counter) Per(key string, taken float64, total float64) *types.Count {
-	return cntr.Touch(key).Per(taken, total)
+func (co *Counter) Avg(key string, num float64) *types.Count {
+	return co.Touch(key).Avg(num)
 }
 
-func (cntr *Counter) Time(key string, d time.Duration) func() time.Duration {
-	return cntr.Touch(key).Time(d)
+func (co *Counter) Per(key string, taken float64, total float64) *types.Count {
+	return co.Touch(key).Per(taken, total)
 }
 
-func (cntr *Counter) Duration() func() time.Duration {
+func (co *Counter) Time(key string, d time.Duration) func() time.Duration {
+	return co.Touch(key).Time(d)
+}
+
+func (co *Counter) Duration() func() time.Duration {
 	mtx := sync.Mutex{}
 	ts := time.Now()
 	return func() time.Duration {
@@ -152,14 +169,14 @@ func (cntr *Counter) Duration() func() time.Duration {
 	}
 }
 
-func (cntr *Counter) DurationFloat64(d time.Duration) func() float64 {
-	delta := cntr.Duration()
+func (co *Counter) DurationFloat64(d time.Duration) func() float64 {
+	delta := co.Duration()
 	return func() float64 {
 		return float64(delta()) / float64(d)
 	}
 }
 
-func (cntr *Counter) Snippet(kind string, keyname string, limit int) string {
+func (co *Counter) Snippet(kind string, keyname string, limit int) string {
 	w := struct {
 		Widget   string `json:"widget"`
 		Logname  string `json:"logname"`
@@ -169,8 +186,8 @@ func (cntr *Counter) Snippet(kind string, keyname string, limit int) string {
 		Limit    int    `json:"limit,omitempty"`
 	}{
 		"counter",
-		cntr.Logname,
-		cntr.GetHostname(),
+		co.Logname,
+		co.GetHostname(),
 		keyname,
 		kind,
 		limit,
@@ -179,66 +196,75 @@ func (cntr *Counter) Snippet(kind string, keyname string, limit int) string {
 	return string(text)
 }
 
-func (cntr *Counter) collectSystemInfo() {
+func (co *Counter) collectSystemInfo() {
 	l, _ := load.Avg()
 	m, _ := mem.VirtualMemory()
 	d, _ := disk.Usage("/")
 	c, _ := cpu.Percent(time.Second, true)
-	cntr.Avg("la", l.Load1)
-	cntr.Per("mem", float64(m.Used), float64(m.Total))
-	cntr.Per("disk", float64(d.Used), float64(d.Total))
+	co.Avg("la", l.Load1)
+	co.Per("mem", float64(m.Used), float64(m.Total))
+	co.Per("disk", float64(d.Used), float64(d.Total))
 	for _, v := range c {
-		cntr.Per("cpu", v, 100)
+		co.Per("cpu", v, 100)
 	}
 	if connections, err := psnet.Connections("inet"); err == nil {
-		cntr.Max("net:inet", float64(len(connections)))
+		co.Max("net:inet", float64(len(connections)))
 	}
 	if connections, err := psnet.Connections("tcp"); err == nil {
-		cntr.Max("net:tcp", float64(len(connections)))
+		co.Max("net:tcp", float64(len(connections)))
 	}
 	if connections, err := psnet.Connections("udp"); err == nil {
-		cntr.Max("net:udp", float64(len(connections)))
+		co.Max("net:udp", float64(len(connections)))
 	}
 }
-func (cntr *Counter) WatchSystem() {
-	cntr.watchSystem = true
+func (co *Counter) WatchSystem() {
+	co.watchSystem = true
 }
 
-func (cntr *Counter) collectProcessInfo() {
+func (co *Counter) collectProcessInfo() {
 	proc := process.Process{Pid: int32(os.Getpid())}
 	var memState runtime.MemStats
 	runtime.ReadMemStats(&memState)
-	cntr.Avg("runtime.NumGoroutine()", float64(runtime.NumGoroutine()))
-	cntr.Avg("runtime.ReadMemStats().NumGC", float64(memState.NumGC))
-	cntr.Avg("runtime.ReadMemStats().TotalAlloc", float64(memState.TotalAlloc))
-	cntr.Avg("runtime.ReadMemStats().HeapAlloc", float64(memState.HeapAlloc))
-	cntr.Avg("runtime.ReadMemStats().HeapObjects", float64(memState.HeapObjects))
+	co.Avg("runtime.NumGoroutine()", float64(runtime.NumGoroutine()))
+	co.Avg("runtime.ReadMemStats().TotalAlloc", float64(memState.TotalAlloc))
+	co.Avg("runtime.ReadMemStats().HeapAlloc", float64(memState.HeapAlloc))
+	co.Avg("runtime.ReadMemStats().HeapObjects", float64(memState.HeapObjects))
+	if time.Now().Second() > co.getFlushedAt().Second() {
+		keyname := "runtime.ReadMemStats().NumGC"
+		var preval float64
+		co.RLock()
+		if co.statePrev != nil && co.statePrev[keyname] != nil && co.statePrev[keyname].Metrics.Avg != nil {
+			preval = co.statePrev["runtime.ReadMemStats().NumGC"].Metrics.Avg.Value()
+		}
+		co.RUnlock()
+		co.Avg("runtime.ReadMemStats().NumGC", float64(memState.NumGC)-preval)
+	}
 	if cpuPercent, err := proc.CPUPercent(); err == nil {
-		cntr.Avg("process.CPUPercent()", cpuPercent)
+		co.Avg("process.CPUPercent()", cpuPercent)
 	}
 	if numThreads, err := proc.NumThreads(); err == nil {
-		cntr.Avg("process.NumThreads()", float64(numThreads))
+		co.Avg("process.NumThreads()", float64(numThreads))
 	}
 	if memoryPercent, err := proc.MemoryPercent(); err == nil {
-		cntr.Avg("process.MemoryPercent()", float64(memoryPercent))
+		co.Avg("process.MemoryPercent()", float64(memoryPercent))
 	}
 	if memoryInfo, err := proc.MemoryInfo(); err == nil {
-		cntr.Avg("process.MemoryInfo().rss", float64(memoryInfo.RSS))
-		cntr.Avg("process.MemoryInfo().vms", float64(memoryInfo.VMS))
+		co.Avg("process.MemoryInfo().rss", float64(memoryInfo.RSS))
+		co.Avg("process.MemoryInfo().vms", float64(memoryInfo.VMS))
 	}
 	pid := int32(os.Getpid())
 	if connections, err := psnet.ConnectionsPid("inet", pid); err == nil {
-		cntr.Avg("process.Connections().inet", float64(len(connections)))
+		co.Avg("process.Connections().inet", float64(len(connections)))
 	}
 	if connections, err := psnet.ConnectionsPid("tcp", pid); err == nil {
-		cntr.Avg("process.Connections().tcp", float64(len(connections)))
+		co.Avg("process.Connections().tcp", float64(len(connections)))
 	}
-	if connections, err := psnet.ConnectionsPid("upd", pid); err == nil {
-		cntr.Avg("process.Connections().upd", float64(len(connections)))
+	if connections, err := psnet.ConnectionsPid("udp", pid); err == nil {
+		co.Avg("process.Connections().udp", float64(len(connections)))
 	}
-	cntr.Max("lifetime", time.Now().Sub(ts).Minutes())
+	co.Max("lifetime", time.Now().Sub(ts).Minutes())
 }
 
-func (cntr *Counter) WatchProcess() {
-	cntr.watchProcess = true
+func (co *Counter) WatchProcess() {
+	co.watchProcess = true
 }
