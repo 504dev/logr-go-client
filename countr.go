@@ -36,7 +36,6 @@ type Counter struct {
 	Logname      string
 	watchSystem  bool
 	watchProcess bool
-	flushedAt    time.Time
 }
 
 func (co *Counter) connect() error {
@@ -57,14 +56,7 @@ func (co *Counter) run(interval time.Duration) {
 	})()
 }
 
-func (co *Counter) getFlushedAt() time.Time {
-	co.RLock()
-	defer co.RUnlock()
-	return co.flushedAt
-}
-
 func (co *Counter) Flush() State {
-	ts := time.Now()
 	if co.watchSystem {
 		co.collectSystemInfo()
 	}
@@ -78,7 +70,6 @@ func (co *Counter) Flush() State {
 	tmp := co.State
 	co.statePrev = tmp
 	co.State = make(State)
-	co.flushedAt = ts
 
 	go func() {
 		for _, c := range tmp {
