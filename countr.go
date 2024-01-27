@@ -136,15 +136,8 @@ func (co *Counter) Inc(key string, num float64) *types.Count {
 }
 
 func (co *Counter) DeltaInc(key string, num float64) *types.Count {
-	co.Avg(key, num)
-	if prev := co.prevAvg(key); prev != nil {
-		num -= prev.Value()
-	}
-	return co.Inc(key, num)
-}
-func (co *Counter) DeltaInc2(key string, num float64) *types.Count {
-	res, newone := co.touchSafe(key)
-	if newone { // TODO not newone, maybe zero
+	res := co.Touch(key)
+	if res.Metrics.Inc == nil {
 		if prev := co.prevInc(key); prev != nil {
 			res.PrevInc(prev.Prev)
 		} else {
@@ -267,7 +260,6 @@ func (co *Counter) collectProcessInfo() {
 	co.Avg("runtime.ReadMemStats().NextGC", float64(memState.NextGC))
 	co.DeltaInc("runtime.ReadMemStats().TotalAlloc", float64(memState.TotalAlloc))
 	co.DeltaInc("runtime.ReadMemStats().NumGC", float64(memState.NumGC))
-	co.DeltaInc2("runtime.ReadMemStats().NumGC_", float64(memState.NumGC))
 	if cpuPercent, err := proc.CPUPercent(); err == nil {
 		co.Per("process.CPUPercent()", cpuPercent, 100)
 	}
