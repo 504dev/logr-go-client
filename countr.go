@@ -138,7 +138,8 @@ func (co *Counter) Inc(key string, num float64) *types.Count {
 }
 
 func (co *Counter) DeltaInc(key string, num float64) *types.Count {
-	if prev := co.prevInc(key); prev != nil {
+	co.Avg(key, num)
+	if prev := co.prevAvg(key); prev != nil {
 		num -= prev.Value()
 	}
 	return co.Inc(key, num)
