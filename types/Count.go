@@ -72,18 +72,18 @@ func (c *Count) Inc(num float64) *Count {
 	if c.Metrics.Inc == nil {
 		c.Metrics.Inc = &Inc{}
 	}
-	c.Metrics.Inc.Val += num - c.Metrics.Inc.Prev
+	c.Metrics.Inc.Val += num - c.Metrics.Inc.Last
 	c.now()
 	return c
 }
 
-func (c *Count) PrevInc(num float64) *Count {
+func (c *Count) IncLast(num float64) *Count {
 	c.Lock()
 	defer c.Unlock()
 	if c.Metrics.Inc == nil {
 		c.Metrics.Inc = &Inc{}
 	}
-	c.Metrics.Inc.Prev = num
+	c.Metrics.Inc.Last = num
 	c.now()
 	return c
 }
@@ -159,7 +159,7 @@ func (c *Count) Time(duration time.Duration) func() time.Duration {
 
 type Inc struct {
 	Val  float64 `db:"inc,omitempty" json:"inc,omitempty"`
-	Prev float64 `db:"-" json:"-"`
+	Last float64 `db:"-" json:"-"`
 }
 
 type Max struct {
@@ -185,7 +185,7 @@ type Time struct {
 }
 
 func (i *Inc) Value() float64 {
-	return i.Val - i.Prev
+	return i.Val
 }
 
 func (m *Max) Value() float64 {

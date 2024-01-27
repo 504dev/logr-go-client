@@ -135,17 +135,17 @@ func (co *Counter) Inc(key string, num float64) *types.Count {
 	return co.Touch(key).Inc(num)
 }
 
-func (co *Counter) DeltaInc(key string, num float64) *types.Count {
+func (co *Counter) IncDiff(key string, num float64) *types.Count {
 	res := co.Touch(key)
 	if res.Metrics.Inc == nil {
 		if prev := co.prevInc(key); prev != nil {
-			res.PrevInc(prev.Prev)
+			res.IncLast(prev.Last)
 		} else {
-			return res.PrevInc(num)
+			return res.IncLast(num)
 		}
 	}
 
-	return res.Inc(num).PrevInc(num)
+	return res.Inc(num).IncLast(num)
 }
 
 func (co *Counter) prevInc(key string) *types.Inc {
@@ -258,8 +258,8 @@ func (co *Counter) collectProcessInfo() {
 	co.Avg("runtime.ReadMemStats().HeapObjects", float64(memState.HeapObjects))
 	co.Avg("runtime.ReadMemStats().HeapAlloc", float64(memState.HeapAlloc))
 	co.Avg("runtime.ReadMemStats().NextGC", float64(memState.NextGC))
-	co.DeltaInc("runtime.ReadMemStats().TotalAlloc", float64(memState.TotalAlloc))
-	co.DeltaInc("runtime.ReadMemStats().NumGC", float64(memState.NumGC))
+	co.IncDiff("runtime.ReadMemStats().TotalAlloc", float64(memState.TotalAlloc))
+	co.IncDiff("runtime.ReadMemStats().NumGC", float64(memState.NumGC))
 	if cpuPercent, err := proc.CPUPercent(); err == nil {
 		co.Per("process.CPUPercent()", cpuPercent, 100)
 	}
