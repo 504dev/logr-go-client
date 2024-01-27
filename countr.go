@@ -149,6 +149,15 @@ func (co *Counter) Avg(key string, num float64) *types.Count {
 	return co.Touch(key).Avg(num)
 }
 
+func (co *Counter) prevAvg(key string) *types.Avg {
+	co.RLock()
+	defer co.RUnlock()
+	if co.statePrev != nil && co.statePrev[key] != nil && co.statePrev[key].Metrics.Avg != nil {
+		return co.statePrev[key].Metrics.Avg
+	}
+	return nil
+}
+
 func (co *Counter) Per(key string, taken float64, total float64) *types.Count {
 	return co.Touch(key).Per(taken, total)
 }
@@ -231,22 +240,20 @@ func (co *Counter) collectProcessInfo() {
 	co.Avg("runtime.ReadMemStats().HeapObjects", float64(memState.HeapObjects))
 	if time.Now().Second() > co.getFlushedAt().Second() {
 		keyname := "runtime.ReadMemStats().NumGC"
-		var preval float64
-		co.RLock()
-		if co.statePrev != nil && co.statePrev[keyname] != nil && co.statePrev[keyname].Metrics.Avg != nil {
-			preval = co.statePrev["runtime.ReadMemStats().NumGC"].Metrics.Avg.Value()
+		value := float64(memState.NumGC)
+		if preval := co.prevAvg(keyname); preval != nil {
+			value -= preval.Value()
 		}
-		co.RUnlock()
-		co.Avg("runtime.ReadMemStats().NumGC", float64(memState.NumGC)-preval)
+		co.Avg(keyname, value)
 	}
 	if cpuPercent, err := proc.CPUPercent(); err == nil {
-		co.Avg("process.CPUPercent()", cpuPercent)
+		co.Per("process.CPUPercent()", cpuPercent, 100)
+	}
+	if memoryPercent, err := proc.MemoryPercent(); err == nil {
+		co.Per("process.MemoryPercent()", float64(memoryPercent), 100)
 	}
 	if numThreads, err := proc.NumThreads(); err == nil {
 		co.Avg("process.NumThreads()", float64(numThreads))
-	}
-	if memoryPercent, err := proc.MemoryPercent(); err == nil {
-		co.Avg("process.MemoryPercent()", float64(memoryPercent))
 	}
 	if memoryInfo, err := proc.MemoryInfo(); err == nil {
 		co.Avg("process.MemoryInfo().rss", float64(memoryInfo.RSS))
