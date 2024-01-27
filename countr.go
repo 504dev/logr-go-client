@@ -7,6 +7,7 @@ import (
 	"github.com/shirou/gopsutil/disk"
 	"github.com/shirou/gopsutil/load"
 	"github.com/shirou/gopsutil/mem"
+	psnet "github.com/shirou/gopsutil/net"
 	"github.com/shirou/gopsutil/process"
 	"log"
 	"net"
@@ -189,6 +190,15 @@ func (cntr *Counter) collectSystemInfo() {
 	for _, v := range c {
 		cntr.Per("cpu", v, 100)
 	}
+	if connections, err := psnet.Connections("inet"); err == nil {
+		cntr.Max("net:inet", float64(len(connections)))
+	}
+	if connections, err := psnet.Connections("tcp"); err == nil {
+		cntr.Max("net:tcp", float64(len(connections)))
+	}
+	if connections, err := psnet.Connections("udp"); err == nil {
+		cntr.Max("net:udp", float64(len(connections)))
+	}
 }
 func (cntr *Counter) WatchSystem() {
 	cntr.watchSystem = true
@@ -215,6 +225,16 @@ func (cntr *Counter) collectProcessInfo() {
 	if memoryInfo, err := proc.MemoryInfo(); err == nil {
 		cntr.Avg("process.MemoryInfo().rss", float64(memoryInfo.RSS))
 		cntr.Avg("process.MemoryInfo().vms", float64(memoryInfo.VMS))
+	}
+	pid := int32(os.Getpid())
+	if connections, err := psnet.ConnectionsPid("inet", pid); err == nil {
+		cntr.Avg("process.Connections().inet", float64(len(connections)))
+	}
+	if connections, err := psnet.ConnectionsPid("tcp", pid); err == nil {
+		cntr.Avg("process.Connections().tcp", float64(len(connections)))
+	}
+	if connections, err := psnet.ConnectionsPid("upd", pid); err == nil {
+		cntr.Avg("process.Connections().upd", float64(len(connections)))
 	}
 	cntr.Max("lifetime", time.Now().Sub(ts).Minutes())
 }
