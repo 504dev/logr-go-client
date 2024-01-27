@@ -1,7 +1,6 @@
 package types
 
 import (
-	"fmt"
 	"github.com/504dev/logr-go-client/cipher"
 	"sync"
 	"time"
@@ -20,34 +19,12 @@ type Count struct {
 
 type Metrics struct {
 	*Inc
+	*DeltaInc
 	*Max
 	*Min
 	*Avg
 	*Per
 	*Time
-}
-
-func (m Metrics) ToMap() map[string]interface{} {
-	res := map[string]interface{}{}
-	if m.Inc != nil {
-		res["inc"] = m.Inc.Value()
-	}
-	if m.Max != nil {
-		res["max"] = m.Max.Value()
-	}
-	if m.Min != nil {
-		res["min"] = m.Min.Value()
-	}
-	if m.Avg != nil {
-		res["avg"] = m.Avg.Value()
-	}
-	if m.Per != nil {
-		res["per"] = m.Per.Value()
-	}
-	if m.Time != nil {
-		res["time"] = m.Time.Value()
-	}
-	return res
 }
 
 func (c *Count) Decrypt(cipherText string, priv string) error {
@@ -112,6 +89,18 @@ func (c *Count) Inc(num float64) *Count {
 		c.Metrics.Inc = &Inc{}
 	}
 	c.Metrics.Inc.Val += num
+	c.now()
+	return c
+}
+
+func (c *Count) DeltaInc(num float64) *Count {
+	c.Lock()
+	defer c.Unlock()
+	if c.Metrics.DeltaInc == nil {
+		c.Metrics.DeltaInc = &DeltaInc{}
+	}
+	c.Metrics.DeltaInc.Val += num - c.Metrics.DeltaInc.Prev
+	c.Metrics.DeltaInc.Prev = num
 	c.now()
 	return c
 }
@@ -185,36 +174,13 @@ func (c *Count) Time(duration time.Duration) func() time.Duration {
 	}
 }
 
-type Counts []*Count
-
-type Serie struct {
-	Hostname string           `json:"hostname"`
-	Keyname  string           `json:"keyname"`
-	Kind     string           `json:"kind"`
-	Data     [][2]interface{} `json:"data"`
-}
-type Series []*Serie
-
-func (cs Counts) Format() Series {
-	m := map[string]*Serie{}
-	for _, c := range cs {
-		for k, v := range c.ToMap() {
-			key := fmt.Sprintf("%v:%v:%v", k, c.Keyname, c.Hostname)
-			if _, ok := m[key]; !ok {
-				m[key] = &Serie{Hostname: c.Hostname, Keyname: c.Keyname, Kind: k}
-			}
-			m[key].Data = append(m[key].Data, [2]interface{}{c.Timestamp, v})
-		}
-	}
-	res := make(Series, 0, len(m))
-	for _, s := range m {
-		res = append(res, s)
-	}
-	return res
-}
-
 type Inc struct {
 	Val float64 `db:"inc,omitempty" json:"inc,omitempty"`
+}
+
+type DeltaInc struct {
+	Prev float64
+	Val  float64 `db:"inc,omitempty" json:"inc,omitempty"`
 }
 
 type Max struct {
@@ -240,6 +206,10 @@ type Time struct {
 }
 
 func (i *Inc) Value() float64 {
+	return i.Val
+}
+
+func (i *DeltaInc) Value() float64 {
 	return i.Val
 }
 
