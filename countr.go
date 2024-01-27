@@ -137,6 +137,22 @@ func (co *Counter) Inc(key string, num float64) *types.Count {
 	return co.Touch(key).Inc(num)
 }
 
+func (co *Counter) DeltaInc(key string, num float64) *types.Count {
+	if prev := co.prevInc(key); prev != nil {
+		num -= prev.Value()
+	}
+	return co.Inc(key, num)
+}
+
+func (co *Counter) prevInc(key string) *types.Inc {
+	co.RLock()
+	defer co.RUnlock()
+	if co.statePrev != nil && co.statePrev[key] != nil && co.statePrev[key].Metrics.Inc != nil {
+		return co.statePrev[key].Metrics.Inc
+	}
+	return nil
+}
+
 func (co *Counter) Max(key string, num float64) *types.Count {
 	return co.Touch(key).Max(num)
 }
@@ -238,14 +254,7 @@ func (co *Counter) collectProcessInfo() {
 	co.Avg("runtime.ReadMemStats().TotalAlloc", float64(memState.TotalAlloc))
 	co.Avg("runtime.ReadMemStats().HeapAlloc", float64(memState.HeapAlloc))
 	co.Avg("runtime.ReadMemStats().HeapObjects", float64(memState.HeapObjects))
-	if time.Now().Second() > co.getFlushedAt().Second() {
-		keyname := "runtime.ReadMemStats().NumGC"
-		value := float64(memState.NumGC)
-		if preval := co.prevAvg(keyname); preval != nil {
-			value -= preval.Value()
-		}
-		co.Avg(keyname, value)
-	}
+	co.DeltaInc("runtime.ReadMemStats().NumGC", float64(memState.NumGC))
 	if cpuPercent, err := proc.CPUPercent(); err == nil {
 		co.Per("process.CPUPercent()", cpuPercent, 100)
 	}
