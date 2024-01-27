@@ -23,7 +23,7 @@
 * `Counter.Min`
 * `Counter.Per`
 * `Counter.Time`
-* `Counter.Snippet` bonus method!
+* `Counter.Snippet`
 
 
 Installing

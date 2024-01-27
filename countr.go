@@ -32,6 +32,7 @@ type Counter struct {
 	sync.RWMutex
 	*time.Ticker
 	State
+	statePrev    State
 	Logname      string
 	watchSystem  bool
 	watchProcess bool
@@ -56,7 +57,14 @@ func (co *Counter) run(interval time.Duration) {
 	})()
 }
 
+func (co *Counter) getFlushedAt() time.Time {
+	co.RLock()
+	defer co.RUnlock()
+	return co.flushedAt
+}
+
 func (co *Counter) Flush() State {
+	ts := time.Now()
 	if co.watchSystem {
 		co.collectSystemInfo()
 	}
@@ -68,7 +76,9 @@ func (co *Counter) Flush() State {
 	defer co.Unlock()
 
 	tmp := co.State
+	co.statePrev = tmp
 	co.State = make(State)
+	co.flushedAt = ts
 
 	go func() {
 		for _, c := range tmp {
@@ -128,7 +138,20 @@ func (co *Counter) Inc(key string, num float64) *types.Count {
 }
 
 func (co *Counter) DeltaInc(key string, num float64) *types.Count {
-	return co.Touch(key).DeltaInc(num)
+	co.Avg(key, num)
+	if prev := co.prevAvg(key); prev != nil {
+		num -= prev.Value()
+	}
+	return co.Inc(key, num)
+}
+
+func (co *Counter) prevInc(key string) *types.Inc {
+	co.RLock()
+	defer co.RUnlock()
+	if co.statePrev != nil && co.statePrev[key] != nil && co.statePrev[key].Metrics.Inc != nil {
+		return co.statePrev[key].Metrics.Inc
+	}
+	return nil
 }
 
 func (co *Counter) Max(key string, num float64) *types.Count {
@@ -141,6 +164,15 @@ func (co *Counter) Min(key string, num float64) *types.Count {
 
 func (co *Counter) Avg(key string, num float64) *types.Count {
 	return co.Touch(key).Avg(num)
+}
+
+func (co *Counter) prevAvg(key string) *types.Avg {
+	co.RLock()
+	defer co.RUnlock()
+	if co.statePrev != nil && co.statePrev[key] != nil && co.statePrev[key].Metrics.Avg != nil {
+		return co.statePrev[key].Metrics.Avg
+	}
+	return nil
 }
 
 func (co *Counter) Per(key string, taken float64, total float64) *types.Count {
@@ -220,10 +252,10 @@ func (co *Counter) collectProcessInfo() {
 	var memState runtime.MemStats
 	runtime.ReadMemStats(&memState)
 	co.Avg("runtime.NumGoroutine()", float64(runtime.NumGoroutine()))
-	co.Avg("runtime.ReadMemStats().TotalAlloc", float64(memState.TotalAlloc))
-	co.Avg("runtime.ReadMemStats().HeapAlloc", float64(memState.HeapAlloc))
 	co.Avg("runtime.ReadMemStats().HeapObjects", float64(memState.HeapObjects))
+	co.Avg("runtime.ReadMemStats().HeapAlloc", float64(memState.HeapAlloc))
 	co.Avg("runtime.ReadMemStats().NextGC", float64(memState.NextGC))
+	co.DeltaInc("runtime.ReadMemStats().TotalAlloc", float64(memState.TotalAlloc))
 	co.DeltaInc("runtime.ReadMemStats().NumGC", float64(memState.NumGC))
 	if cpuPercent, err := proc.CPUPercent(); err == nil {
 		co.Per("process.CPUPercent()", cpuPercent, 100)

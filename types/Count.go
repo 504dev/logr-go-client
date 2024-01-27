@@ -19,7 +19,6 @@ type Count struct {
 
 type Metrics struct {
 	*Inc
-	*DeltaInc
 	*Max
 	*Min
 	*Avg
@@ -32,9 +31,6 @@ func (m Metrics) ToMap() map[string]interface{} {
 	res := map[string]interface{}{}
 	if m.Inc != nil {
 		res["inc"] = m.Inc.Value()
-	}
-	if m.DeltaInc != nil {
-		res["inc"] = m.DeltaInc.Value() // yes, "inc"
 	}
 	if m.Max != nil {
 		res["max"] = m.Max.Value()
@@ -120,18 +116,6 @@ func (c *Count) Inc(num float64) *Count {
 	return c
 }
 
-func (c *Count) DeltaInc(num float64) *Count {
-	c.Lock()
-	defer c.Unlock()
-	if c.Metrics.DeltaInc == nil {
-		c.Metrics.DeltaInc = &DeltaInc{}
-	}
-	c.Metrics.DeltaInc.Val += num - c.Metrics.DeltaInc.Prev
-	c.Metrics.DeltaInc.Prev = num
-	c.now()
-	return c
-}
-
 func (c *Count) Max(num float64) *Count {
 	c.Lock()
 	defer c.Unlock()
@@ -205,11 +189,6 @@ type Inc struct {
 	Val float64 `db:"inc,omitempty" json:"inc,omitempty"`
 }
 
-type DeltaInc struct {
-	Prev float64
-	Val  float64 `db:"inc,omitempty" json:"inc,omitempty"` // yes, inc
-}
-
 type Max struct {
 	Val float64 `db:"max,omitempty" json:"max,omitempty"`
 }
@@ -233,10 +212,6 @@ type Time struct {
 }
 
 func (i *Inc) Value() float64 {
-	return i.Val
-}
-
-func (i *DeltaInc) Value() float64 {
 	return i.Val
 }
 
