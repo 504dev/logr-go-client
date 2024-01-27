@@ -27,6 +27,33 @@ type Metrics struct {
 	*Time
 }
 
+// for logr usage
+func (m Metrics) ToMap() map[string]interface{} {
+	res := map[string]interface{}{}
+	if m.Inc != nil {
+		res["inc"] = m.Inc.Value()
+	}
+	if m.DeltaInc != nil {
+		res["inc"] = m.DeltaInc.Value() // yes, "inc"
+	}
+	if m.Max != nil {
+		res["max"] = m.Max.Value()
+	}
+	if m.Min != nil {
+		res["min"] = m.Min.Value()
+	}
+	if m.Avg != nil {
+		res["avg"] = m.Avg.Value()
+	}
+	if m.Per != nil {
+		res["per"] = m.Per.Value()
+	}
+	if m.Time != nil {
+		res["time"] = m.Time.Value()
+	}
+	return res
+}
+
 func (c *Count) Decrypt(cipherText string, priv string) error {
 	c.RLock()
 	defer c.RUnlock()
@@ -180,7 +207,7 @@ type Inc struct {
 
 type DeltaInc struct {
 	Prev float64
-	Val  float64 `db:"inc,omitempty" json:"inc,omitempty"`
+	Val  float64 `db:"inc,omitempty" json:"inc,omitempty"` // yes, inc
 }
 
 type Max struct {
