@@ -62,45 +62,6 @@ func (c *Count) Encrypt(priv string) (string, error) {
 	return cipher.EncryptAesJson(c, priv)
 }
 
-func (c *Count) AsVector() []interface{} {
-	c.RLock()
-	defer c.RUnlock()
-	dt := time.Unix(c.Timestamp, 0).UTC()
-	day := dt.Format("2006-01-02")
-	values := []interface{}{day, dt, c.DashId, c.Hostname, c.Logname, c.Keyname, c.Version}
-	if c.Metrics.Inc == nil {
-		values = append(values, nil)
-	} else {
-		values = append(values, c.Metrics.Inc.Val)
-	}
-	if c.Metrics.Max == nil {
-		values = append(values, nil)
-	} else {
-		values = append(values, c.Metrics.Max.Val)
-	}
-	if c.Metrics.Min == nil {
-		values = append(values, nil)
-	} else {
-		values = append(values, c.Metrics.Min.Val)
-	}
-	if c.Metrics.Avg == nil {
-		values = append(values, nil, nil)
-	} else {
-		values = append(values, c.Metrics.Avg.Sum, c.Metrics.Avg.Num)
-	}
-	if c.Metrics.Per == nil {
-		values = append(values, nil, nil)
-	} else {
-		values = append(values, c.Metrics.Per.Taken, c.Metrics.Per.Total)
-	}
-	if c.Metrics.Time == nil {
-		values = append(values, nil)
-	} else {
-		values = append(values, c.Metrics.Time.Duration)
-	}
-	return values
-}
-
 func (c *Count) now() {
 	c.Timestamp = time.Now().Unix()
 }
@@ -112,6 +73,17 @@ func (c *Count) Inc(num float64) *Count {
 		c.Metrics.Inc = &Inc{}
 	}
 	c.Metrics.Inc.Val += num
+	c.now()
+	return c
+}
+
+func (c *Count) PrevInc(num float64) *Count {
+	c.Lock()
+	defer c.Unlock()
+	if c.Metrics.Inc == nil {
+		c.Metrics.Inc = &Inc{}
+	}
+	c.Metrics.Inc.Prev = num
 	c.now()
 	return c
 }
@@ -186,7 +158,8 @@ func (c *Count) Time(duration time.Duration) func() time.Duration {
 }
 
 type Inc struct {
-	Val float64 `db:"inc,omitempty" json:"inc,omitempty"`
+	Val  float64 `db:"inc,omitempty" json:"inc,omitempty"`
+	Prev float64
 }
 
 type Max struct {

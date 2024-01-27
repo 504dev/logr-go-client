@@ -111,6 +111,11 @@ func (co *Counter) writeCount(count *types.Count) (int, error) {
 }
 
 func (co *Counter) Touch(key string) *types.Count {
+	res, _ := co.touchSafe(key)
+	return res
+}
+
+func (co *Counter) touchSafe(key string) (c *types.Count, new bool) {
 	co.Lock()
 	defer co.Unlock()
 	if _, ok := co.State[key]; !ok {
@@ -121,9 +126,11 @@ func (co *Counter) Touch(key string) *types.Count {
 			Keyname:  key,
 			Version:  co.GetVersion(),
 		}
+		new = true
 	}
-	return co.State[key]
+	return co.State[key], new
 }
+
 func (co *Counter) Inc(key string, num float64) *types.Count {
 	return co.Touch(key).Inc(num)
 }
@@ -132,6 +139,13 @@ func (co *Counter) DeltaInc(key string, num float64) *types.Count {
 	co.Avg(key, num)
 	if prev := co.prevAvg(key); prev != nil {
 		num -= prev.Value()
+	}
+	return co.Inc(key, num)
+}
+func (co *Counter) DeltaInc2(key string, num float64) *types.Count {
+	co.Touch(key).PrevInc(num)
+	if prev := co.prevInc(key); prev != nil {
+		num -= prev.Prev
 	}
 	return co.Inc(key, num)
 }
@@ -248,6 +262,7 @@ func (co *Counter) collectProcessInfo() {
 	co.Avg("runtime.ReadMemStats().NextGC", float64(memState.NextGC))
 	co.DeltaInc("runtime.ReadMemStats().TotalAlloc", float64(memState.TotalAlloc))
 	co.DeltaInc("runtime.ReadMemStats().NumGC", float64(memState.NumGC))
+	co.DeltaInc2("runtime.ReadMemStats().NumGC_", float64(memState.NumGC))
 	if cpuPercent, err := proc.CPUPercent(); err == nil {
 		co.Per("process.CPUPercent()", cpuPercent, 100)
 	}
