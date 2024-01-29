@@ -261,7 +261,7 @@ func (co *Counter) collectProcessInfo() {
 	co.IncDiff("runtime.ReadMemStats().TotalAlloc", float64(memState.TotalAlloc))
 	co.IncDiff("runtime.ReadMemStats().NumGC", float64(memState.NumGC))
 	if cpuPercent, err := proc.CPUPercent(); err == nil {
-		co.Per("process.CPUPercent()", cpuPercent, 100)
+		co.Per("process.CPUPercent()", cpuPercent/float64(runtime.NumCPU()), 100)
 	}
 	if memoryPercent, err := proc.MemoryPercent(); err == nil {
 		co.Per("process.MemoryPercent()", float64(memoryPercent), 100)
