@@ -58,14 +58,14 @@ type Logger struct {
 	*Counter
 }
 
-func (lg *Logger) DefaultWritter() *Writter {
-	return &Writter{
+func (lg *Logger) DefaultWritter() *Writer {
+	return &Writer{
 		Logger: lg,
 	}
 }
 
-func (lg *Logger) CustomWritter(f func(log *Log)) *Writter {
-	return &Writter{
+func (lg *Logger) CustomWritter(f func(log *Log)) *Writer {
+	return &Writer{
 		Logger:    lg,
 		Transform: f,
 	}
