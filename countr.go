@@ -2,6 +2,7 @@ package logr_go_client
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/504dev/logr-go-client/types"
 	"github.com/shirou/gopsutil/cpu"
 	"github.com/shirou/gopsutil/disk"
@@ -16,6 +17,32 @@ import (
 	"sync"
 	"time"
 )
+
+type Kind string
+
+const (
+	KIND_AVG Kind = "avg"
+	KIND_INC      = "inc"
+	KIND_MAX      = "max"
+	KIND_MIN      = "min"
+	KIND_PER      = "per"
+)
+
+func (k Kind) Validate() bool {
+	switch k {
+	case "avg":
+		return true
+	case "inc":
+		return true
+	case "max":
+		return true
+	case "min":
+		return true
+	case "per":
+		return true
+	}
+	return false
+}
 
 var ts = time.Now()
 
@@ -205,21 +232,35 @@ func (co *Counter) DurationFloat64(d time.Duration) func() float64 {
 	}
 }
 
-func (co *Counter) Snippet(kind string, keyname string, limit int) string {
-	w := struct {
-		Widget   string `json:"widget"`
-		Logname  string `json:"logname"`
-		Hostname string `json:"hostname"`
-		Keyname  string `json:"keyname"`
-		Kind     string `json:"kind"`
-		Limit    int    `json:"limit,omitempty"`
-	}{
+type Snippet struct {
+	Widget   string `json:"widget"`
+	Logname  string `json:"logname"`
+	Hostname string `json:"hostname"`
+	Keyname  string `json:"keyname"`
+	Kind     Kind   `json:"kind"`
+	Limit    int    `json:"limit,omitempty"`
+	Error    string `json:"error,omitempty"`
+}
+
+func (co *Counter) Snippet(kind Kind, keyname string, limit int) string {
+	return co.SnippetLogname(co.Logname, kind, keyname, limit)
+
+}
+func (co *Counter) SnippetLogname(logname string, kind Kind, keyname string, limit int) string {
+	w := Snippet{
 		"counter",
-		co.Logname,
+		logname,
 		co.GetHostname(),
 		keyname,
 		kind,
 		limit,
+		"",
+	}
+	if !kind.Validate() {
+		w = Snippet{
+			Widget: "counter",
+			Error:  fmt.Sprintf("unknown kind %s", kind),
+		}
 	}
 	text, _ := json.Marshal(w)
 	return string(text)

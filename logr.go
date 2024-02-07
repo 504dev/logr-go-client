@@ -58,6 +58,12 @@ type Logger struct {
 	*Counter
 }
 
+func (lg *Logger) Of(logname string) *Logger {
+	tmp := *lg
+	tmp.Logname = logname
+	return &tmp
+}
+
 func (lg *Logger) DefaultWriter() *Writer {
 	return &Writer{
 		Logger: lg,
