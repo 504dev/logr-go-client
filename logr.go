@@ -106,6 +106,7 @@ func (lg *Logger) prefix(level string) string {
 
 func (lg *Logger) body(msg string) string {
 	res := lg.Body
+	res = strings.Replace(res, "{logname}", lg.Logname, -1)
 	res = strings.Replace(res, "{version}", lg.GetVersion(), -1)
 	res = strings.Replace(res, "{pid}", strconv.Itoa(lg.GetPid()), -1)
 	res = strings.Replace(res, "{initiator}", utils.Initiator(), -1)
