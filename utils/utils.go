@@ -14,7 +14,12 @@ func ReadGitCommit() string {
 func ReadGitCommitDir(dir string) string {
 	cmd := exec.Command("git", "rev-parse", "HEAD")
 	cmd.Dir = dir
-	stdout, _ := cmd.Output()
+	stdout, err := cmd.Output()
+	if err != nil {
+		cmd := exec.Command("cat", ".git/HEAD")
+		cmd.Dir = dir
+		stdout, _ = cmd.Output()
+	}
 	commit := strings.TrimSuffix(string(stdout), "\n")
 
 	return commit
