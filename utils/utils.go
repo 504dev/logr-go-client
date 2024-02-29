@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"os"
 	"os/exec"
 	"regexp"
 	"runtime/debug"
@@ -18,6 +19,9 @@ func ReadGitCommitDir(dir string) string {
 	if err != nil {
 		cmd := exec.Command("cat", ".git/HEAD")
 		cmd.Dir = dir
+		if dir == "" {
+			cmd.Dir, _ = os.Executable()
+		}
 		stdout, _ = cmd.Output()
 	}
 	commit := strings.TrimSuffix(string(stdout), "\n")
