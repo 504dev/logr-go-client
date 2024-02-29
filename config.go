@@ -25,9 +25,6 @@ type Config struct {
 
 func (c *Config) NewLogger(logname string) (*Logger, error) {
 	conn, err := net.Dial("udp", c.Udp)
-	if err != nil {
-		return nil, err
-	}
 	res := &Logger{
 		Config:  c,
 		Logname: logname,
@@ -37,11 +34,8 @@ func (c *Config) NewLogger(logname string) (*Logger, error) {
 		Level:   LevelDebug,
 		Console: true,
 	}
-	res.Counter, err = c.NewCounter(logname)
-	if err != nil {
-		return nil, err
-	}
-	return res, nil
+	res.Counter = c.NewCounterConn(logname, conn)
+	return res, err
 }
 
 func (c *Config) NewCounterConn(name string, conn net.Conn) *Counter {
