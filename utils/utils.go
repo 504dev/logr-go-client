@@ -3,6 +3,7 @@ package utils
 import (
 	"os"
 	"os/exec"
+	"path/filepath"
 	"regexp"
 	"runtime/debug"
 	"strings"
@@ -20,7 +21,8 @@ func ReadGitCommitDir(dir string) string {
 		cmd := exec.Command("cat", ".git/HEAD")
 		cmd.Dir = dir
 		if dir == "" {
-			cmd.Dir, _ = os.Executable()
+			execFile, _ := os.Executable()
+			cmd.Dir = filepath.Dir(execFile)
 		}
 		stdout, _ = cmd.Output()
 	}
