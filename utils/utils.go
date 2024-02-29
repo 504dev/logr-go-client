@@ -10,7 +10,12 @@ import (
 )
 
 func ReadGitCommit() string {
-	return ReadGitCommitDir("")
+	commit := ReadGitCommitDir("")
+	if commit == "" {
+		execFile, _ := os.Executable()
+		commit = ReadGitCommitDir(filepath.Dir(execFile))
+	}
+	return commit
 }
 
 func ReadGitCommitDir(dir string) string {
@@ -20,10 +25,6 @@ func ReadGitCommitDir(dir string) string {
 	if err != nil {
 		cmd := exec.Command("cat", ".git/HEAD")
 		cmd.Dir = dir
-		if dir == "" {
-			execFile, _ := os.Executable()
-			cmd.Dir = filepath.Dir(execFile)
-		}
 		stdout, _ = cmd.Output()
 	}
 	commit := strings.TrimSuffix(string(stdout), "\n")
