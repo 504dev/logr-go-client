@@ -17,8 +17,8 @@ func RandString(n int) string {
 	return string(b)
 }
 
-func ChunkifyString(input string, length int) []string {
-	result := make([]string, 0, 2)
+func ChunkifyString(input []byte, length int) [][]byte {
+	result := make([][]byte, 0, 2)
 	for i := 0; i < len(input); i += length {
 		end := i + length
 		if end > len(input) {

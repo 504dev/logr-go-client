@@ -18,10 +18,10 @@ type Log struct {
 
 type Logs []*Log
 
-func (log *Log) Decrypt(cipherText string, priv string) error {
-	return cipher.DecodeAesJson(cipherText, priv, log)
+func (log *Log) Decrypt(cipherBytes []byte, priv string) error {
+	return cipher.DecodeAesJson(cipherBytes, priv, log)
 }
 
-func (log *Log) Encrypt(priv string) (string, error) {
+func (log *Log) Encrypt(priv string) ([]byte, error) {
 	return cipher.EncryptAesJson(log, priv)
 }

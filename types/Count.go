@@ -50,13 +50,13 @@ func (m Metrics) ToMap() map[string]interface{} {
 	return res
 }
 
-func (c *Count) Decrypt(cipherText string, priv string) error {
+func (c *Count) Decrypt(cipherData []byte, priv string) error {
 	c.RLock()
 	defer c.RUnlock()
-	return cipher.DecodeAesJson(cipherText, priv, c)
+	return cipher.DecodeAesJson(cipherData, priv, c)
 }
 
-func (c *Count) Encrypt(priv string) (string, error) {
+func (c *Count) Encrypt(priv string) ([]byte, error) {
 	c.RLock()
 	defer c.RUnlock()
 	return cipher.EncryptAesJson(c, priv)

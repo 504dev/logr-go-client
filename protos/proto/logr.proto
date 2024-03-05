@@ -10,7 +10,7 @@ service Logr {
 
 message LogPackage {
   int32 dash_id = 1;
-  bytes public_key = 2;
+  string public_key = 2;
   bytes cipher_log = 3;
   bytes cipher_count = 4;
   bytes plain_log = 5;

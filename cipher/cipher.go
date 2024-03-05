@@ -11,24 +11,18 @@ import (
 	"io"
 )
 
-func EncryptAesJson(data interface{}, priv string) (string, error) {
-	privateKeyBytes, _ := base64.StdEncoding.DecodeString(priv)
+func EncryptAesJson(data interface{}, priv string) ([]byte, error) {
+	privBytes, _ := base64.StdEncoding.DecodeString(priv)
 	jsonMsg, err := json.Marshal(data)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
-	cipherBytes, err := EncryptAes(jsonMsg, privateKeyBytes)
-	if err != nil {
-		return "", err
-	}
-	cipherText := base64.StdEncoding.EncodeToString(cipherBytes)
-	return cipherText, err
+	return EncryptAes(jsonMsg, privBytes)
 }
 
-func DecodeAesJson(cipherText string, priv string, dest interface{}) error {
-	priv64, _ := base64.StdEncoding.DecodeString(priv)
-	cipher64, _ := base64.StdEncoding.DecodeString(cipherText)
-	text, err := DecryptAes(cipher64, priv64)
+func DecodeAesJson(cipherBytes []byte, priv string, dest interface{}) error {
+	privBytes, _ := base64.StdEncoding.DecodeString(priv)
+	text, err := DecryptAes(cipherBytes, privBytes)
 	if err != nil {
 		return err
 	}

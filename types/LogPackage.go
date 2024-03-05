@@ -38,10 +38,10 @@ func (ch *ChunkInfo) CalcSig(privBase64 string) (signatureBase64 string, err err
 type LogPackage struct {
 	DashId      int                    `json:"dash_id,omitempty"`
 	PublicKey   string                 `json:"public_key"`
-	CipherLog   string                 `json:"cipher_log,omitempty"`
-	CipherCount string                 `json:"cipher_count,omitempty"`
-	PlainLog    string                 `json:"_log,omitempty"`
-	*Log        `json:"log,omitempty"` // deprecated field, do not support long messages
+	CipherLog   []byte                 `json:"cipher_log,omitempty"`
+	CipherCount []byte                 `json:"cipher_count,omitempty"`
+	PlainLog    []byte                 `json:"_log,omitempty"`
+	*Log        `json:"log,omitempty"` // field do not support long messages over udp
 	*Count      `json:"count,omitempty"`
 	Sig         string     `json:"sig,omitempty"`
 	Chunk       *ChunkInfo `json:"chunk"`
@@ -49,19 +49,11 @@ type LogPackage struct {
 
 func (lp *LogPackage) PB() *pb.LogPackage {
 	res := &pb.LogPackage{
-		DashId: int32(lp.DashId),
-	}
-	if lp.PublicKey != "" {
-		res.PublicKey, _ = base64.StdEncoding.DecodeString(lp.PublicKey)
-	}
-	if lp.CipherLog != "" {
-		res.CipherLog, _ = base64.StdEncoding.DecodeString(lp.CipherLog)
-	}
-	if lp.CipherCount != "" {
-		res.CipherCount, _ = base64.StdEncoding.DecodeString(lp.CipherCount)
-	}
-	if lp.PlainLog != "" {
-		res.PlainLog, _ = base64.StdEncoding.DecodeString(lp.PlainLog)
+		DashId:      int32(lp.DashId),
+		PublicKey:   lp.PublicKey,
+		CipherLog:   lp.CipherLog,
+		CipherCount: lp.CipherCount,
+		PlainLog:    lp.PlainLog,
 	}
 	if lp.Log != nil {
 		res.Log = &pb.LogPackage_Log{
@@ -115,15 +107,14 @@ func (lp *LogPackage) SerializeLog() error {
 	if err != nil {
 		return err
 	}
-	lp.PlainLog = base64.StdEncoding.EncodeToString(msg)
+	lp.PlainLog = msg
 	lp.Log = nil
 	return nil
 }
 
 func (lp *LogPackage) DeserializeLog() error {
 	log := Log{}
-	decoded, _ := base64.StdEncoding.DecodeString(lp.PlainLog)
-	err := json.Unmarshal(decoded, &log)
+	err := json.Unmarshal(lp.PlainLog, &log)
 	if err != nil {
 		return err
 	}
@@ -185,8 +176,8 @@ func (lp *LogPackage) Chunkify(n int, priv string) ([][]byte, error) {
 		return [][]byte{msg}, err
 	}
 
-	var data string
-	if lp.CipherLog != "" {
+	var data []byte
+	if len(lp.CipherLog) > 0 {
 		data = lp.CipherLog
 	} else {
 		data = lp.PlainLog
@@ -204,7 +195,7 @@ func (lp *LogPackage) Chunkify(n int, priv string) ([][]byte, error) {
 			return nil, err
 		}
 
-		if lp.CipherLog != "" {
+		if len(lp.CipherLog) > 0 {
 			lpi.CipherLog = chunk
 		} else {
 			lpi.PlainLog = chunk

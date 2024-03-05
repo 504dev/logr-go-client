@@ -102,6 +102,7 @@ func (conn *Transport) PushCount(count *types.Count) (int, error) {
 		PublicKey: conn.Config.PublicKey,
 		Count:     count,
 	}
+
 	if !conn.Config.NoCipher {
 		err := lp.EncryptCount(conn.Config.PrivateKey)
 		if err != nil {
