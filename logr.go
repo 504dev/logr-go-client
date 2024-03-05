@@ -5,7 +5,6 @@ import (
 	"github.com/504dev/logr-go-client/types"
 	"github.com/504dev/logr-go-client/utils"
 	"github.com/fatih/color"
-	"net"
 	"os"
 	"strconv"
 	"strings"
@@ -49,13 +48,21 @@ const MAX_MESSAGE_SIZE = 9000
 
 type Logger struct {
 	*Config
-	net.Conn
+	Transport
 	Logname string
 	Body    string
 	Prefix  string
 	Level   string
 	Console bool
 	*Counter
+}
+
+func (lg *Logger) Close() error {
+	err := lg.Transport.Close()
+	if err != nil {
+		return err
+	}
+	return lg.Counter.Transport.Close()
 }
 
 func (lg *Logger) Of(logname string) *Logger {
@@ -183,43 +190,5 @@ func (lg *Logger) writeLevel(level string, msg string) (int, error) {
 	log.Level = level
 	log.Message = msg
 
-	return lg.writeLog(log)
-}
-
-func (lg *Logger) writeLog(log *types.Log) (int, error) {
-	if lg.Conn == nil {
-		return 0, nil
-	}
-
-	lp := types.LogPackage{
-		DashId:    lg.DashId,
-		PublicKey: lg.PublicKey,
-		Log:       log,
-	}
-
-	if lg.NoCipher {
-		err := lp.SerializeLog()
-		if err != nil {
-			return 0, err
-		}
-	} else {
-		err := lp.EncryptLog(lg.PrivateKey)
-		if err != nil {
-			return 0, err
-		}
-	}
-
-	chunks, err := lp.Chunkify(MAX_MESSAGE_SIZE, lg.PrivateKey)
-	if err != nil {
-		return 0, err
-	}
-
-	for i, chunk := range chunks {
-		_, err = lg.Conn.Write(chunk)
-		if err != nil {
-			return i, err
-		}
-	}
-
-	return len(chunks), nil
+	return lg.PushLog(log)
 }

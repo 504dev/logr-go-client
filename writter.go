@@ -18,7 +18,7 @@ func (w *Writer) Write(b []byte) (int, error) {
 		w.Transform(&Log{Log: log})
 	}
 
-	return w.writeLog(log)
+	return w.PushLog(log)
 }
 
 type Log struct {

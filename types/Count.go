@@ -11,9 +11,9 @@ type Count struct {
 	DashId    int    `db:"dash_id"   json:"dash_id,omitempty"`
 	Timestamp int64  `db:"timestamp" json:"timestamp"`
 	Hostname  string `db:"hostname"  json:"hostname,omitempty"`
+	Version   string `db:"version"   json:"version,omitempty"`
 	Logname   string `db:"logname"   json:"logname,omitempty"`
 	Keyname   string `db:"keyname"   json:"keyname"`
-	Version   string `db:"version"   json:"version,omitempty"`
 	Metrics   `json:"metrics"`
 }
 
@@ -142,7 +142,7 @@ func (c *Count) Time(duration time.Duration) func() time.Duration {
 	if c.Metrics.Time == nil {
 		c.Metrics.Time = &Time{}
 	}
-	c.Metrics.Time.Duration += duration.Nanoseconds()
+	c.Metrics.Time.Duration = duration.Nanoseconds()
 	c.now()
 	ts := time.Now()
 	var delta *time.Duration

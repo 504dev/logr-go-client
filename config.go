@@ -3,7 +3,6 @@ package logr_go_client
 import (
 	"github.com/504dev/logr-go-client/types"
 	"github.com/504dev/logr-go-client/utils"
-	"net"
 	"os"
 	"time"
 )
@@ -14,6 +13,7 @@ var commit = utils.ReadGitCommit()
 var tag = utils.ReadGitTag()
 
 type Config struct {
+	Grpc       string
 	Udp        string
 	DashId     int
 	PublicKey  string
@@ -24,36 +24,34 @@ type Config struct {
 }
 
 func (c *Config) NewLogger(logname string) (*Logger, error) {
-	conn, err := net.Dial("udp", c.Udp)
-	res := &Logger{
+	logger := &Logger{
 		Config:  c,
 		Logname: logname,
 		Prefix:  "{time} {level} ",
 		Body:    "[{version}, pid={pid}, {initiator}] {message}",
-		Conn:    conn,
 		Level:   LevelDebug,
 		Console: true,
 	}
-	res.Counter = c.NewCounterConn(logname, conn)
-	return res, err
+	err := logger.Connect(c)
+	if err != nil {
+		return logger, err
+	}
+	logger.Counter, err = c.NewCounter(logname)
+	return logger, err
 }
 
-func (c *Config) NewCounterConn(name string, conn net.Conn) *Counter {
-	cntr := &Counter{
+func (c *Config) NewCounter(name string) (*Counter, error) {
+	counter := &Counter{
 		Config:  c,
 		Logname: name,
 		State:   make(map[string]*types.Count),
-		Conn:    conn,
 	}
-	cntr.run(10 * time.Second)
-	return cntr
-}
-func (c *Config) NewCounter(name string) (*Counter, error) {
-	conn, err := net.Dial("udp", c.Udp)
+	err := counter.Connect(c)
 	if err != nil {
-		return nil, err
+		return counter, err
 	}
-	return c.NewCounterConn(name, conn), nil
+	counter.run(10 * time.Second)
+	return counter, err
 }
 
 func (c *Config) DefaultSystemCounter() (*Counter, error) {

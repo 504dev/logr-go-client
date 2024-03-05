@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"github.com/504dev/logr-go-client/cipher"
 	"github.com/504dev/logr-go-client/helpers"
+	pb "github.com/504dev/logr-go-client/protos/gen/go"
 	"time"
 )
 
@@ -44,6 +45,69 @@ type LogPackage struct {
 	*Count      `json:"count,omitempty"`
 	Sig         string     `json:"sig,omitempty"`
 	Chunk       *ChunkInfo `json:"chunk"`
+}
+
+func (lp *LogPackage) PB() *pb.LogPackage {
+	res := &pb.LogPackage{
+		DashId: int32(lp.DashId),
+	}
+	if lp.PublicKey != "" {
+		res.PublicKey, _ = base64.StdEncoding.DecodeString(lp.PublicKey)
+	}
+	if lp.CipherLog != "" {
+		res.CipherLog, _ = base64.StdEncoding.DecodeString(lp.CipherLog)
+	}
+	if lp.CipherCount != "" {
+		res.CipherCount, _ = base64.StdEncoding.DecodeString(lp.CipherCount)
+	}
+	if lp.PlainLog != "" {
+		res.PlainLog, _ = base64.StdEncoding.DecodeString(lp.PlainLog)
+	}
+	if lp.Log != nil {
+		res.Log = &pb.LogPackage_Log{
+			DashId:    int32(lp.Log.DashId),
+			Pid:       int32(lp.Log.Pid),
+			Timestamp: lp.Log.Timestamp,
+			Hostname:  lp.Log.Hostname,
+			Logname:   lp.Log.Logname,
+			Level:     lp.Log.Level,
+			Message:   lp.Log.Message,
+			Version:   lp.Log.Version,
+			Initiator: lp.Log.Initiator,
+		}
+	}
+	if lp.Count != nil {
+		res.Count = &pb.LogPackage_Count{
+			DashId:    int32(lp.Log.DashId),
+			Timestamp: lp.Count.Timestamp,
+			Hostname:  lp.Count.Hostname,
+			Version:   lp.Count.Version,
+			Logname:   lp.Count.Logname,
+			Keyname:   lp.Count.Keyname,
+			Metrics:   &pb.LogPackage_Count_Metrics{},
+		}
+		if v := lp.Count.Metrics.Inc; v != nil {
+			res.Count.Metrics.Inc = float32(v.Val)
+		}
+		if v := lp.Count.Metrics.Max; v != nil {
+			res.Count.Metrics.Max = float32(v.Val)
+		}
+		if v := lp.Count.Metrics.Min; v != nil {
+			res.Count.Metrics.Min = float32(v.Val)
+		}
+		if v := lp.Count.Metrics.Avg; v != nil {
+			res.Count.Metrics.AvgSum = float32(v.Sum)
+			res.Count.Metrics.AvgNum = int32(v.Num)
+		}
+		if v := lp.Count.Metrics.Per; v != nil {
+			res.Count.Metrics.PerTkn = float32(v.Taken)
+			res.Count.Metrics.PerTtl = float32(v.Total)
+		}
+		if v := lp.Count.Metrics.Time; v != nil {
+			res.Count.Metrics.TimeDur = float32(v.Duration)
+		}
+	}
+	return res
 }
 
 func (lp *LogPackage) SerializeLog() error {

@@ -1,0 +1,61 @@
+syntax = "proto3";
+
+package logr;
+
+option go_package = "kozhurkin.logr.v1;logrv1";
+
+service Logr {
+  rpc Push (LogPackage) returns (Response);
+}
+
+message LogPackage {
+  int32 dash_id = 1;
+  bytes public_key = 2;
+  bytes cipher_log = 3;
+  bytes cipher_count = 4;
+  bytes plain_log = 5;
+  string sig = 6;
+  Log log = 7;
+  Count count = 8;
+  Chunk chunk = 9;
+  message Log {
+    int32 dash_id = 1;
+    int32 pid = 2;
+    int64 timestamp = 3;
+    string hostname = 4;
+    string logname = 5;
+    string level = 6;
+    string message = 7;
+    string version = 9;
+    string initiator = 10;
+  }
+  message Count {
+    int32 dash_id = 1;
+    int64 timestamp = 2;
+    string hostname = 3;
+    string version = 4;
+    string logname = 5;
+    string keyname = 6;
+    Metrics metrics = 7;
+    message Metrics {
+      float inc = 1;
+      float max = 2;
+      float min = 3;
+      float avg_sum = 4;
+      int32 avg_num = 5;
+      float per_tkn = 6;
+      float per_ttl = 7;
+      float time_dur = 8;
+    }
+  }
+  message Chunk {
+    string uid = 1;
+    int64 ts = 2;
+    int32 i = 3;
+    int32 n = 4;
+  }
+}
+
+message Response {
+  //
+}

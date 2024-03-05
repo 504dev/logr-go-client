@@ -11,7 +11,6 @@ import (
 	psnet "github.com/shirou/gopsutil/v3/net"
 	"github.com/shirou/gopsutil/v3/process"
 	"log"
-	"net"
 	"os"
 	"runtime"
 	"sync"
@@ -55,7 +54,7 @@ func (cm State) String() string {
 
 type Counter struct {
 	*Config
-	net.Conn
+	Transport
 	sync.RWMutex
 	*time.Ticker
 	State
@@ -63,14 +62,6 @@ type Counter struct {
 	Logname      string
 	watchSystem  bool
 	watchProcess bool
-}
-
-func (co *Counter) connect() error {
-	var err error
-	if co.Conn == nil {
-		co.Conn, err = net.Dial("udp", co.Config.Udp)
-	}
-	return err
 }
 
 func (co *Counter) run(interval time.Duration) {
@@ -100,7 +91,7 @@ func (co *Counter) Flush() State {
 
 	go func() {
 		for _, c := range tmp {
-			_, err := co.writeCount(c)
+			_, err := co.PushCount(c)
 			if err != nil {
 				log.Println(err)
 			}
@@ -108,33 +99,6 @@ func (co *Counter) Flush() State {
 	}()
 
 	return tmp
-}
-
-func (co *Counter) writeCount(count *types.Count) (int, error) {
-	if co.Conn == nil {
-		return 0, nil
-	}
-	lp := types.LogPackage{
-		DashId:    co.Config.DashId,
-		PublicKey: co.Config.PublicKey,
-		Count:     count,
-	}
-	if !co.Config.NoCipher {
-		err := lp.EncryptCount(co.Config.PrivateKey)
-		if err != nil {
-			return 0, err
-		}
-	}
-
-	msg, err := json.Marshal(lp)
-	if err != nil {
-		return 0, err
-	}
-	_, err = co.Conn.Write(msg)
-	if err != nil {
-		return 0, err
-	}
-	return len(msg), nil
 }
 
 func (co *Counter) Touch(key string) *types.Count {
