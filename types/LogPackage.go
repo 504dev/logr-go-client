@@ -2,12 +2,12 @@ package types
 
 import (
 	"encoding/base64"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/504dev/logr-go-client/cipher"
 	"github.com/504dev/logr-go-client/helpers"
 	pb "github.com/504dev/logr-go-client/protos/gen/go"
+	gojson "github.com/goccy/go-json"
 	"github.com/golang/protobuf/proto"
 	"time"
 )
@@ -109,7 +109,7 @@ func (lp *LogPackage) Proto() *pb.LogrpcPackage {
 }
 
 func (lp *LogPackage) SerializeLog() error {
-	msg, err := json.Marshal(lp.Log)
+	msg, err := gojson.Marshal(lp.Log)
 	if err != nil {
 		return err
 	}
@@ -120,7 +120,7 @@ func (lp *LogPackage) SerializeLog() error {
 
 func (lp *LogPackage) DeserializeLog() error {
 	log := Log{}
-	err := json.Unmarshal(lp.PlainLog, &log)
+	err := gojson.Unmarshal(lp.PlainLog, &log)
 	if err != nil {
 		return err
 	}
@@ -173,7 +173,7 @@ func (lp *LogPackage) Chunkify(n int, priv string) ([][]byte, error) {
 		return nil, err
 	}
 
-	msg, err := json.Marshal(lp)
+	msg, err := gojson.Marshal(lp)
 	if err != nil {
 		return nil, err
 	}
@@ -207,7 +207,7 @@ func (lp *LogPackage) Chunkify(n int, priv string) ([][]byte, error) {
 			lpi.PlainLog = chunk
 		}
 
-		result[i], err = json.Marshal(lpi)
+		result[i], err = gojson.Marshal(lpi)
 		if err != nil {
 			return nil, err
 		}

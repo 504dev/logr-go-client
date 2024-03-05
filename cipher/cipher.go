@@ -6,14 +6,14 @@ import (
 	"crypto/rand"
 	"crypto/sha256"
 	"encoding/base64"
-	"encoding/json"
 	"errors"
+	gojson "github.com/goccy/go-json"
 	"io"
 )
 
 func EncryptAesJson(data interface{}, priv string) ([]byte, error) {
 	privBytes, _ := base64.StdEncoding.DecodeString(priv)
-	jsonMsg, err := json.Marshal(data)
+	jsonMsg, err := gojson.Marshal(data)
 	if err != nil {
 		return nil, err
 	}
@@ -26,7 +26,7 @@ func DecodeAesJson(cipherBytes []byte, priv string, dest interface{}) error {
 	if err != nil {
 		return err
 	}
-	err = json.Unmarshal(text, dest)
+	err = gojson.Unmarshal(text, dest)
 	if err != nil {
 		return err
 	}

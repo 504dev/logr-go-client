@@ -1,9 +1,9 @@
 package logr_go_client
 
 import (
-	"encoding/json"
 	"fmt"
 	"github.com/504dev/logr-go-client/types"
+	gojson "github.com/goccy/go-json"
 	"github.com/shirou/gopsutil/v3/cpu"
 	"github.com/shirou/gopsutil/v3/disk"
 	"github.com/shirou/gopsutil/v3/load"
@@ -48,7 +48,7 @@ var ts = time.Now()
 type State map[string]*types.Count
 
 func (cm State) String() string {
-	text, _ := json.MarshalIndent(cm, "", "  ")
+	text, _ := gojson.MarshalIndent(cm, "", "  ")
 	return string(text)
 }
 
@@ -226,7 +226,7 @@ func (co *Counter) SnippetLogname(logname string, kind Kind, keyname string, lim
 			Error:  fmt.Sprintf("unknown kind %s", kind),
 		}
 	}
-	text, _ := json.Marshal(w)
+	text, _ := gojson.Marshal(w)
 	return string(text)
 }
 

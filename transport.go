@@ -2,9 +2,9 @@ package logr_go_client
 
 import (
 	"context"
-	"encoding/json"
 	pb "github.com/504dev/logr-go-client/protos/gen/go"
 	"github.com/504dev/logr-go-client/types"
+	gojson "github.com/goccy/go-json"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	"net"
@@ -116,7 +116,7 @@ func (conn *Transport) PushCount(count *types.Count) (int, error) {
 		return conn.pushGrpc(&lp)
 	}
 
-	msg, err := json.Marshal(lp)
+	msg, err := gojson.Marshal(lp)
 	if err != nil {
 		return 0, err
 	}
