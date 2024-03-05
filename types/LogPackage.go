@@ -48,66 +48,6 @@ type LogPackage struct {
 	Chunk       *ChunkInfo `json:"chunk"`
 }
 
-func (lp *LogPackage) ProtoBytes() []byte {
-	res, _ := proto.Marshal(lp.Proto())
-	return res
-}
-
-func (lp *LogPackage) Proto() *pb.LogRpcPackage {
-	res := &pb.LogRpcPackage{
-		DashId:      int32(lp.DashId),
-		PublicKey:   lp.PublicKey,
-		CipherLog:   lp.CipherLog,
-		CipherCount: lp.CipherCount,
-		PlainLog:    lp.PlainLog,
-	}
-	if lp.Log != nil {
-		res.Log = &pb.LogRpcPackage_Log{
-			DashId:    int32(lp.Log.DashId),
-			Pid:       int32(lp.Log.Pid),
-			Timestamp: lp.Log.Timestamp,
-			Hostname:  lp.Log.Hostname,
-			Logname:   lp.Log.Logname,
-			Level:     lp.Log.Level,
-			Message:   lp.Log.Message,
-			Version:   lp.Log.Version,
-			Initiator: lp.Log.Initiator,
-		}
-	}
-	if lp.Count != nil {
-		res.Count = &pb.LogRpcPackage_Count{
-			DashId:    int32(lp.Log.DashId),
-			Timestamp: lp.Count.Timestamp,
-			Hostname:  lp.Count.Hostname,
-			Version:   lp.Count.Version,
-			Logname:   lp.Count.Logname,
-			Keyname:   lp.Count.Keyname,
-			Metrics:   &pb.LogRpcPackage_Count_Metrics{},
-		}
-		if v := lp.Count.Metrics.Inc; v != nil {
-			res.Count.Metrics.Inc = float32(v.Val)
-		}
-		if v := lp.Count.Metrics.Max; v != nil {
-			res.Count.Metrics.Max = float32(v.Val)
-		}
-		if v := lp.Count.Metrics.Min; v != nil {
-			res.Count.Metrics.Min = float32(v.Val)
-		}
-		if v := lp.Count.Metrics.Avg; v != nil {
-			res.Count.Metrics.AvgSum = float32(v.Sum)
-			res.Count.Metrics.AvgNum = int32(v.Num)
-		}
-		if v := lp.Count.Metrics.Per; v != nil {
-			res.Count.Metrics.PerTkn = float32(v.Taken)
-			res.Count.Metrics.PerTtl = float32(v.Total)
-		}
-		if v := lp.Count.Metrics.Time; v != nil {
-			res.Count.Metrics.TimeDur = float32(v.Duration)
-		}
-	}
-	return res
-}
-
 func (lp *LogPackage) SerializeLog() error {
 	msg, err := gojson.Marshal(lp.Log)
 	if err != nil {
@@ -230,4 +170,116 @@ func (lp *LogPackage) Sign(uid string, i int, n int, privBase64 string) error {
 	lp.Chunk = chunkInfo
 	lp.Sig = signature
 	return nil
+}
+
+func (lp *LogPackage) ProtoBytes() []byte {
+	res, _ := proto.Marshal(lp.Proto())
+	return res
+}
+
+func (lp *LogPackage) FromProto(lrp *pb.LogRpcPackage) {
+	*lp = LogPackage{
+		DashId:      int(lrp.DashId),
+		PublicKey:   lrp.PublicKey,
+		CipherLog:   lrp.CipherLog,
+		CipherCount: lrp.CipherCount,
+		PlainLog:    lrp.PlainLog,
+	}
+	if lrp.Log != nil {
+		lp.Log = &Log{
+			DashId:    int(lrp.Log.DashId),
+			Pid:       int(lrp.Log.Pid),
+			Timestamp: lrp.Log.Timestamp,
+			Hostname:  lrp.Log.Hostname,
+			Logname:   lrp.Log.Logname,
+			Level:     lrp.Log.Level,
+			Message:   lrp.Log.Message,
+			Version:   lrp.Log.Version,
+			Initiator: lrp.Log.Initiator,
+		}
+	}
+	if lp.Count != nil {
+		lp.Count = &Count{
+			DashId:    int(lrp.Log.DashId),
+			Timestamp: lrp.Count.Timestamp,
+			Hostname:  lrp.Count.Hostname,
+			Version:   lrp.Count.Version,
+			Logname:   lrp.Count.Logname,
+			Keyname:   lrp.Count.Keyname,
+			Metrics:   Metrics{},
+		}
+		if v := lrp.Count.Metrics.Inc; v != 0 {
+			lp.Count.Inc(float64(v))
+		}
+		if v := lrp.Count.Metrics.Max; v != 0 {
+			lp.Count.Max(float64(v))
+		}
+		if v := lrp.Count.Metrics.Min; v != 0 {
+			lp.Count.Min(float64(v))
+		}
+		if s, n := lrp.Count.Metrics.AvgSum, lrp.Count.Metrics.AvgNum; s != 0 && n != 0 {
+			lp.Count.Metrics.Avg = &Avg{float64(s), int(n)}
+		}
+		if s, t := lrp.Count.Metrics.PerTkn, lrp.Count.Metrics.PerTtl; s != 0 && t != 0 {
+			lp.Count.Metrics.Per = &Per{float64(s), float64(t)}
+		}
+		if v := lrp.Count.Metrics.TimeDur; v != 0 {
+			lp.Count.Metrics.Time = &Time{int64(v)}
+		}
+	}
+}
+
+func (lp *LogPackage) Proto() *pb.LogRpcPackage {
+	res := &pb.LogRpcPackage{
+		DashId:      int32(lp.DashId),
+		PublicKey:   lp.PublicKey,
+		CipherLog:   lp.CipherLog,
+		CipherCount: lp.CipherCount,
+		PlainLog:    lp.PlainLog,
+	}
+	if lp.Log != nil {
+		res.Log = &pb.LogRpcPackage_Log{
+			DashId:    int32(lp.Log.DashId),
+			Pid:       int32(lp.Log.Pid),
+			Timestamp: lp.Log.Timestamp,
+			Hostname:  lp.Log.Hostname,
+			Logname:   lp.Log.Logname,
+			Level:     lp.Log.Level,
+			Message:   lp.Log.Message,
+			Version:   lp.Log.Version,
+			Initiator: lp.Log.Initiator,
+		}
+	}
+	if lp.Count != nil {
+		res.Count = &pb.LogRpcPackage_Count{
+			DashId:    int32(lp.Log.DashId),
+			Timestamp: lp.Count.Timestamp,
+			Hostname:  lp.Count.Hostname,
+			Version:   lp.Count.Version,
+			Logname:   lp.Count.Logname,
+			Keyname:   lp.Count.Keyname,
+			Metrics:   &pb.LogRpcPackage_Count_Metrics{},
+		}
+		if v := lp.Count.Metrics.Inc; v != nil {
+			res.Count.Metrics.Inc = float32(v.Val)
+		}
+		if v := lp.Count.Metrics.Max; v != nil {
+			res.Count.Metrics.Max = float32(v.Val)
+		}
+		if v := lp.Count.Metrics.Min; v != nil {
+			res.Count.Metrics.Min = float32(v.Val)
+		}
+		if v := lp.Count.Metrics.Avg; v != nil {
+			res.Count.Metrics.AvgSum = float32(v.Sum)
+			res.Count.Metrics.AvgNum = int32(v.Num)
+		}
+		if v := lp.Count.Metrics.Per; v != nil {
+			res.Count.Metrics.PerTkn = float32(v.Taken)
+			res.Count.Metrics.PerTtl = float32(v.Total)
+		}
+		if v := lp.Count.Metrics.Time; v != nil {
+			res.Count.Metrics.TimeDur = int32(v.Duration)
+		}
+	}
+	return res
 }

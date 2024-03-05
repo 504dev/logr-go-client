@@ -45,7 +45,7 @@ message LogRpcPackage {
       int32 avg_num = 5;
       float per_tkn = 6;
       float per_ttl = 7;
-      float time_dur = 8;
+      int32 time_dur = 8;
     }
   }
   message Chunk {
