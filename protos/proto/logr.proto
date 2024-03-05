@@ -4,37 +4,37 @@ package logr;
 
 option go_package = "kozhurkin.logrpc.v1;logrpcv1";
 
-service Logrpc {
-  rpc Push (LogrpcPackage) returns (Response);
+service LogRpc {
+  rpc Push (LogRpcPackage) returns (Response);
 }
 
-message LogrpcPackage {
+message LogRpcPackage {
   int32 dash_id = 1;
   string public_key = 2;
   bytes cipher_log = 3;
   bytes cipher_count = 4;
   bytes plain_log = 5;
-  string sig = 6;
-  Log log = 7;
-  Count count = 8;
-  Chunk chunk = 9;
+  Log log = 6;
+  Count count = 7;
+  Chunk chunk = 8;
+  string sig = 9;
   message Log {
     int32 dash_id = 1;
-    int32 pid = 2;
-    int64 timestamp = 3;
+    int64 timestamp = 2;
+    string logname = 3;
     string hostname = 4;
-    string logname = 5;
+    string version = 5;
     string level = 6;
     string message = 7;
-    string version = 9;
-    string initiator = 10;
+    string initiator = 8;
+    int32 pid = 9;
   }
   message Count {
     int32 dash_id = 1;
     int64 timestamp = 2;
-    string hostname = 3;
-    string version = 4;
-    string logname = 5;
+    string logname = 3;
+    string hostname = 4;
+    string version = 5;
     string keyname = 6;
     Metrics metrics = 7;
     message Metrics {

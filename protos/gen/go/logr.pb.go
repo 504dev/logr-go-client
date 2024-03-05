@@ -20,7 +20,7 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-type LogrpcPackage struct {
+type LogRpcPackage struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
@@ -30,14 +30,14 @@ type LogrpcPackage struct {
 	CipherLog   []byte               `protobuf:"bytes,3,opt,name=cipher_log,json=cipherLog,proto3" json:"cipher_log,omitempty"`
 	CipherCount []byte               `protobuf:"bytes,4,opt,name=cipher_count,json=cipherCount,proto3" json:"cipher_count,omitempty"`
 	PlainLog    []byte               `protobuf:"bytes,5,opt,name=plain_log,json=plainLog,proto3" json:"plain_log,omitempty"`
-	Sig         string               `protobuf:"bytes,6,opt,name=sig,proto3" json:"sig,omitempty"`
-	Log         *LogrpcPackage_Log   `protobuf:"bytes,7,opt,name=log,proto3" json:"log,omitempty"`
-	Count       *LogrpcPackage_Count `protobuf:"bytes,8,opt,name=count,proto3" json:"count,omitempty"`
-	Chunk       *LogrpcPackage_Chunk `protobuf:"bytes,9,opt,name=chunk,proto3" json:"chunk,omitempty"`
+	Log         *LogRpcPackage_Log   `protobuf:"bytes,6,opt,name=log,proto3" json:"log,omitempty"`
+	Count       *LogRpcPackage_Count `protobuf:"bytes,7,opt,name=count,proto3" json:"count,omitempty"`
+	Chunk       *LogRpcPackage_Chunk `protobuf:"bytes,8,opt,name=chunk,proto3" json:"chunk,omitempty"`
+	Sig         string               `protobuf:"bytes,9,opt,name=sig,proto3" json:"sig,omitempty"`
 }
 
-func (x *LogrpcPackage) Reset() {
-	*x = LogrpcPackage{}
+func (x *LogRpcPackage) Reset() {
+	*x = LogRpcPackage{}
 	if protoimpl.UnsafeEnabled {
 		mi := &file_logr_proto_msgTypes[0]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -45,13 +45,13 @@ func (x *LogrpcPackage) Reset() {
 	}
 }
 
-func (x *LogrpcPackage) String() string {
+func (x *LogRpcPackage) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*LogrpcPackage) ProtoMessage() {}
+func (*LogRpcPackage) ProtoMessage() {}
 
-func (x *LogrpcPackage) ProtoReflect() protoreflect.Message {
+func (x *LogRpcPackage) ProtoReflect() protoreflect.Message {
 	mi := &file_logr_proto_msgTypes[0]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -63,72 +63,72 @@ func (x *LogrpcPackage) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use LogrpcPackage.ProtoReflect.Descriptor instead.
-func (*LogrpcPackage) Descriptor() ([]byte, []int) {
+// Deprecated: Use LogRpcPackage.ProtoReflect.Descriptor instead.
+func (*LogRpcPackage) Descriptor() ([]byte, []int) {
 	return file_logr_proto_rawDescGZIP(), []int{0}
 }
 
-func (x *LogrpcPackage) GetDashId() int32 {
+func (x *LogRpcPackage) GetDashId() int32 {
 	if x != nil {
 		return x.DashId
 	}
 	return 0
 }
 
-func (x *LogrpcPackage) GetPublicKey() string {
+func (x *LogRpcPackage) GetPublicKey() string {
 	if x != nil {
 		return x.PublicKey
 	}
 	return ""
 }
 
-func (x *LogrpcPackage) GetCipherLog() []byte {
+func (x *LogRpcPackage) GetCipherLog() []byte {
 	if x != nil {
 		return x.CipherLog
 	}
 	return nil
 }
 
-func (x *LogrpcPackage) GetCipherCount() []byte {
+func (x *LogRpcPackage) GetCipherCount() []byte {
 	if x != nil {
 		return x.CipherCount
 	}
 	return nil
 }
 
-func (x *LogrpcPackage) GetPlainLog() []byte {
+func (x *LogRpcPackage) GetPlainLog() []byte {
 	if x != nil {
 		return x.PlainLog
 	}
 	return nil
 }
 
-func (x *LogrpcPackage) GetSig() string {
-	if x != nil {
-		return x.Sig
-	}
-	return ""
-}
-
-func (x *LogrpcPackage) GetLog() *LogrpcPackage_Log {
+func (x *LogRpcPackage) GetLog() *LogRpcPackage_Log {
 	if x != nil {
 		return x.Log
 	}
 	return nil
 }
 
-func (x *LogrpcPackage) GetCount() *LogrpcPackage_Count {
+func (x *LogRpcPackage) GetCount() *LogRpcPackage_Count {
 	if x != nil {
 		return x.Count
 	}
 	return nil
 }
 
-func (x *LogrpcPackage) GetChunk() *LogrpcPackage_Chunk {
+func (x *LogRpcPackage) GetChunk() *LogRpcPackage_Chunk {
 	if x != nil {
 		return x.Chunk
 	}
 	return nil
+}
+
+func (x *LogRpcPackage) GetSig() string {
+	if x != nil {
+		return x.Sig
+	}
+	return ""
 }
 
 type Response struct {
@@ -169,24 +169,24 @@ func (*Response) Descriptor() ([]byte, []int) {
 	return file_logr_proto_rawDescGZIP(), []int{1}
 }
 
-type LogrpcPackage_Log struct {
+type LogRpcPackage_Log struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
 	DashId    int32  `protobuf:"varint,1,opt,name=dash_id,json=dashId,proto3" json:"dash_id,omitempty"`
-	Pid       int32  `protobuf:"varint,2,opt,name=pid,proto3" json:"pid,omitempty"`
-	Timestamp int64  `protobuf:"varint,3,opt,name=timestamp,proto3" json:"timestamp,omitempty"`
+	Timestamp int64  `protobuf:"varint,2,opt,name=timestamp,proto3" json:"timestamp,omitempty"`
+	Logname   string `protobuf:"bytes,3,opt,name=logname,proto3" json:"logname,omitempty"`
 	Hostname  string `protobuf:"bytes,4,opt,name=hostname,proto3" json:"hostname,omitempty"`
-	Logname   string `protobuf:"bytes,5,opt,name=logname,proto3" json:"logname,omitempty"`
+	Version   string `protobuf:"bytes,5,opt,name=version,proto3" json:"version,omitempty"`
 	Level     string `protobuf:"bytes,6,opt,name=level,proto3" json:"level,omitempty"`
 	Message   string `protobuf:"bytes,7,opt,name=message,proto3" json:"message,omitempty"`
-	Version   string `protobuf:"bytes,9,opt,name=version,proto3" json:"version,omitempty"`
-	Initiator string `protobuf:"bytes,10,opt,name=initiator,proto3" json:"initiator,omitempty"`
+	Initiator string `protobuf:"bytes,8,opt,name=initiator,proto3" json:"initiator,omitempty"`
+	Pid       int32  `protobuf:"varint,9,opt,name=pid,proto3" json:"pid,omitempty"`
 }
 
-func (x *LogrpcPackage_Log) Reset() {
-	*x = LogrpcPackage_Log{}
+func (x *LogRpcPackage_Log) Reset() {
+	*x = LogRpcPackage_Log{}
 	if protoimpl.UnsafeEnabled {
 		mi := &file_logr_proto_msgTypes[2]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -194,13 +194,13 @@ func (x *LogrpcPackage_Log) Reset() {
 	}
 }
 
-func (x *LogrpcPackage_Log) String() string {
+func (x *LogRpcPackage_Log) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*LogrpcPackage_Log) ProtoMessage() {}
+func (*LogRpcPackage_Log) ProtoMessage() {}
 
-func (x *LogrpcPackage_Log) ProtoReflect() protoreflect.Message {
+func (x *LogRpcPackage_Log) ProtoReflect() protoreflect.Message {
 	mi := &file_logr_proto_msgTypes[2]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -212,90 +212,90 @@ func (x *LogrpcPackage_Log) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use LogrpcPackage_Log.ProtoReflect.Descriptor instead.
-func (*LogrpcPackage_Log) Descriptor() ([]byte, []int) {
+// Deprecated: Use LogRpcPackage_Log.ProtoReflect.Descriptor instead.
+func (*LogRpcPackage_Log) Descriptor() ([]byte, []int) {
 	return file_logr_proto_rawDescGZIP(), []int{0, 0}
 }
 
-func (x *LogrpcPackage_Log) GetDashId() int32 {
+func (x *LogRpcPackage_Log) GetDashId() int32 {
 	if x != nil {
 		return x.DashId
 	}
 	return 0
 }
 
-func (x *LogrpcPackage_Log) GetPid() int32 {
-	if x != nil {
-		return x.Pid
-	}
-	return 0
-}
-
-func (x *LogrpcPackage_Log) GetTimestamp() int64 {
+func (x *LogRpcPackage_Log) GetTimestamp() int64 {
 	if x != nil {
 		return x.Timestamp
 	}
 	return 0
 }
 
-func (x *LogrpcPackage_Log) GetHostname() string {
-	if x != nil {
-		return x.Hostname
-	}
-	return ""
-}
-
-func (x *LogrpcPackage_Log) GetLogname() string {
+func (x *LogRpcPackage_Log) GetLogname() string {
 	if x != nil {
 		return x.Logname
 	}
 	return ""
 }
 
-func (x *LogrpcPackage_Log) GetLevel() string {
+func (x *LogRpcPackage_Log) GetHostname() string {
 	if x != nil {
-		return x.Level
+		return x.Hostname
 	}
 	return ""
 }
 
-func (x *LogrpcPackage_Log) GetMessage() string {
-	if x != nil {
-		return x.Message
-	}
-	return ""
-}
-
-func (x *LogrpcPackage_Log) GetVersion() string {
+func (x *LogRpcPackage_Log) GetVersion() string {
 	if x != nil {
 		return x.Version
 	}
 	return ""
 }
 
-func (x *LogrpcPackage_Log) GetInitiator() string {
+func (x *LogRpcPackage_Log) GetLevel() string {
+	if x != nil {
+		return x.Level
+	}
+	return ""
+}
+
+func (x *LogRpcPackage_Log) GetMessage() string {
+	if x != nil {
+		return x.Message
+	}
+	return ""
+}
+
+func (x *LogRpcPackage_Log) GetInitiator() string {
 	if x != nil {
 		return x.Initiator
 	}
 	return ""
 }
 
-type LogrpcPackage_Count struct {
+func (x *LogRpcPackage_Log) GetPid() int32 {
+	if x != nil {
+		return x.Pid
+	}
+	return 0
+}
+
+type LogRpcPackage_Count struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
 	DashId    int32                        `protobuf:"varint,1,opt,name=dash_id,json=dashId,proto3" json:"dash_id,omitempty"`
 	Timestamp int64                        `protobuf:"varint,2,opt,name=timestamp,proto3" json:"timestamp,omitempty"`
-	Hostname  string                       `protobuf:"bytes,3,opt,name=hostname,proto3" json:"hostname,omitempty"`
-	Version   string                       `protobuf:"bytes,4,opt,name=version,proto3" json:"version,omitempty"`
-	Logname   string                       `protobuf:"bytes,5,opt,name=logname,proto3" json:"logname,omitempty"`
+	Logname   string                       `protobuf:"bytes,3,opt,name=logname,proto3" json:"logname,omitempty"`
+	Hostname  string                       `protobuf:"bytes,4,opt,name=hostname,proto3" json:"hostname,omitempty"`
+	Version   string                       `protobuf:"bytes,5,opt,name=version,proto3" json:"version,omitempty"`
 	Keyname   string                       `protobuf:"bytes,6,opt,name=keyname,proto3" json:"keyname,omitempty"`
-	Metrics   *LogrpcPackage_Count_Metrics `protobuf:"bytes,7,opt,name=metrics,proto3" json:"metrics,omitempty"`
+	Metrics   *LogRpcPackage_Count_Metrics `protobuf:"bytes,7,opt,name=metrics,proto3" json:"metrics,omitempty"`
 }
 
-func (x *LogrpcPackage_Count) Reset() {
-	*x = LogrpcPackage_Count{}
+func (x *LogRpcPackage_Count) Reset() {
+	*x = LogRpcPackage_Count{}
 	if protoimpl.UnsafeEnabled {
 		mi := &file_logr_proto_msgTypes[3]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -303,13 +303,13 @@ func (x *LogrpcPackage_Count) Reset() {
 	}
 }
 
-func (x *LogrpcPackage_Count) String() string {
+func (x *LogRpcPackage_Count) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*LogrpcPackage_Count) ProtoMessage() {}
+func (*LogRpcPackage_Count) ProtoMessage() {}
 
-func (x *LogrpcPackage_Count) ProtoReflect() protoreflect.Message {
+func (x *LogRpcPackage_Count) ProtoReflect() protoreflect.Message {
 	mi := &file_logr_proto_msgTypes[3]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -321,61 +321,61 @@ func (x *LogrpcPackage_Count) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use LogrpcPackage_Count.ProtoReflect.Descriptor instead.
-func (*LogrpcPackage_Count) Descriptor() ([]byte, []int) {
+// Deprecated: Use LogRpcPackage_Count.ProtoReflect.Descriptor instead.
+func (*LogRpcPackage_Count) Descriptor() ([]byte, []int) {
 	return file_logr_proto_rawDescGZIP(), []int{0, 1}
 }
 
-func (x *LogrpcPackage_Count) GetDashId() int32 {
+func (x *LogRpcPackage_Count) GetDashId() int32 {
 	if x != nil {
 		return x.DashId
 	}
 	return 0
 }
 
-func (x *LogrpcPackage_Count) GetTimestamp() int64 {
+func (x *LogRpcPackage_Count) GetTimestamp() int64 {
 	if x != nil {
 		return x.Timestamp
 	}
 	return 0
 }
 
-func (x *LogrpcPackage_Count) GetHostname() string {
-	if x != nil {
-		return x.Hostname
-	}
-	return ""
-}
-
-func (x *LogrpcPackage_Count) GetVersion() string {
-	if x != nil {
-		return x.Version
-	}
-	return ""
-}
-
-func (x *LogrpcPackage_Count) GetLogname() string {
+func (x *LogRpcPackage_Count) GetLogname() string {
 	if x != nil {
 		return x.Logname
 	}
 	return ""
 }
 
-func (x *LogrpcPackage_Count) GetKeyname() string {
+func (x *LogRpcPackage_Count) GetHostname() string {
+	if x != nil {
+		return x.Hostname
+	}
+	return ""
+}
+
+func (x *LogRpcPackage_Count) GetVersion() string {
+	if x != nil {
+		return x.Version
+	}
+	return ""
+}
+
+func (x *LogRpcPackage_Count) GetKeyname() string {
 	if x != nil {
 		return x.Keyname
 	}
 	return ""
 }
 
-func (x *LogrpcPackage_Count) GetMetrics() *LogrpcPackage_Count_Metrics {
+func (x *LogRpcPackage_Count) GetMetrics() *LogRpcPackage_Count_Metrics {
 	if x != nil {
 		return x.Metrics
 	}
 	return nil
 }
 
-type LogrpcPackage_Chunk struct {
+type LogRpcPackage_Chunk struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
@@ -386,8 +386,8 @@ type LogrpcPackage_Chunk struct {
 	N   int32  `protobuf:"varint,4,opt,name=n,proto3" json:"n,omitempty"`
 }
 
-func (x *LogrpcPackage_Chunk) Reset() {
-	*x = LogrpcPackage_Chunk{}
+func (x *LogRpcPackage_Chunk) Reset() {
+	*x = LogRpcPackage_Chunk{}
 	if protoimpl.UnsafeEnabled {
 		mi := &file_logr_proto_msgTypes[4]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -395,13 +395,13 @@ func (x *LogrpcPackage_Chunk) Reset() {
 	}
 }
 
-func (x *LogrpcPackage_Chunk) String() string {
+func (x *LogRpcPackage_Chunk) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*LogrpcPackage_Chunk) ProtoMessage() {}
+func (*LogRpcPackage_Chunk) ProtoMessage() {}
 
-func (x *LogrpcPackage_Chunk) ProtoReflect() protoreflect.Message {
+func (x *LogRpcPackage_Chunk) ProtoReflect() protoreflect.Message {
 	mi := &file_logr_proto_msgTypes[4]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -413,40 +413,40 @@ func (x *LogrpcPackage_Chunk) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use LogrpcPackage_Chunk.ProtoReflect.Descriptor instead.
-func (*LogrpcPackage_Chunk) Descriptor() ([]byte, []int) {
+// Deprecated: Use LogRpcPackage_Chunk.ProtoReflect.Descriptor instead.
+func (*LogRpcPackage_Chunk) Descriptor() ([]byte, []int) {
 	return file_logr_proto_rawDescGZIP(), []int{0, 2}
 }
 
-func (x *LogrpcPackage_Chunk) GetUid() string {
+func (x *LogRpcPackage_Chunk) GetUid() string {
 	if x != nil {
 		return x.Uid
 	}
 	return ""
 }
 
-func (x *LogrpcPackage_Chunk) GetTs() int64 {
+func (x *LogRpcPackage_Chunk) GetTs() int64 {
 	if x != nil {
 		return x.Ts
 	}
 	return 0
 }
 
-func (x *LogrpcPackage_Chunk) GetI() int32 {
+func (x *LogRpcPackage_Chunk) GetI() int32 {
 	if x != nil {
 		return x.I
 	}
 	return 0
 }
 
-func (x *LogrpcPackage_Chunk) GetN() int32 {
+func (x *LogRpcPackage_Chunk) GetN() int32 {
 	if x != nil {
 		return x.N
 	}
 	return 0
 }
 
-type LogrpcPackage_Count_Metrics struct {
+type LogRpcPackage_Count_Metrics struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
@@ -461,8 +461,8 @@ type LogrpcPackage_Count_Metrics struct {
 	TimeDur float32 `protobuf:"fixed32,8,opt,name=time_dur,json=timeDur,proto3" json:"time_dur,omitempty"`
 }
 
-func (x *LogrpcPackage_Count_Metrics) Reset() {
-	*x = LogrpcPackage_Count_Metrics{}
+func (x *LogRpcPackage_Count_Metrics) Reset() {
+	*x = LogRpcPackage_Count_Metrics{}
 	if protoimpl.UnsafeEnabled {
 		mi := &file_logr_proto_msgTypes[5]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -470,13 +470,13 @@ func (x *LogrpcPackage_Count_Metrics) Reset() {
 	}
 }
 
-func (x *LogrpcPackage_Count_Metrics) String() string {
+func (x *LogRpcPackage_Count_Metrics) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*LogrpcPackage_Count_Metrics) ProtoMessage() {}
+func (*LogRpcPackage_Count_Metrics) ProtoMessage() {}
 
-func (x *LogrpcPackage_Count_Metrics) ProtoReflect() protoreflect.Message {
+func (x *LogRpcPackage_Count_Metrics) ProtoReflect() protoreflect.Message {
 	mi := &file_logr_proto_msgTypes[5]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -488,61 +488,61 @@ func (x *LogrpcPackage_Count_Metrics) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use LogrpcPackage_Count_Metrics.ProtoReflect.Descriptor instead.
-func (*LogrpcPackage_Count_Metrics) Descriptor() ([]byte, []int) {
+// Deprecated: Use LogRpcPackage_Count_Metrics.ProtoReflect.Descriptor instead.
+func (*LogRpcPackage_Count_Metrics) Descriptor() ([]byte, []int) {
 	return file_logr_proto_rawDescGZIP(), []int{0, 1, 0}
 }
 
-func (x *LogrpcPackage_Count_Metrics) GetInc() float32 {
+func (x *LogRpcPackage_Count_Metrics) GetInc() float32 {
 	if x != nil {
 		return x.Inc
 	}
 	return 0
 }
 
-func (x *LogrpcPackage_Count_Metrics) GetMax() float32 {
+func (x *LogRpcPackage_Count_Metrics) GetMax() float32 {
 	if x != nil {
 		return x.Max
 	}
 	return 0
 }
 
-func (x *LogrpcPackage_Count_Metrics) GetMin() float32 {
+func (x *LogRpcPackage_Count_Metrics) GetMin() float32 {
 	if x != nil {
 		return x.Min
 	}
 	return 0
 }
 
-func (x *LogrpcPackage_Count_Metrics) GetAvgSum() float32 {
+func (x *LogRpcPackage_Count_Metrics) GetAvgSum() float32 {
 	if x != nil {
 		return x.AvgSum
 	}
 	return 0
 }
 
-func (x *LogrpcPackage_Count_Metrics) GetAvgNum() int32 {
+func (x *LogRpcPackage_Count_Metrics) GetAvgNum() int32 {
 	if x != nil {
 		return x.AvgNum
 	}
 	return 0
 }
 
-func (x *LogrpcPackage_Count_Metrics) GetPerTkn() float32 {
+func (x *LogRpcPackage_Count_Metrics) GetPerTkn() float32 {
 	if x != nil {
 		return x.PerTkn
 	}
 	return 0
 }
 
-func (x *LogrpcPackage_Count_Metrics) GetPerTtl() float32 {
+func (x *LogRpcPackage_Count_Metrics) GetPerTtl() float32 {
 	if x != nil {
 		return x.PerTtl
 	}
 	return 0
 }
 
-func (x *LogrpcPackage_Count_Metrics) GetTimeDur() float32 {
+func (x *LogRpcPackage_Count_Metrics) GetTimeDur() float32 {
 	if x != nil {
 		return x.TimeDur
 	}
@@ -553,7 +553,7 @@ var File_logr_proto protoreflect.FileDescriptor
 
 var file_logr_proto_rawDesc = []byte{
 	0x0a, 0x0a, 0x6c, 0x6f, 0x67, 0x72, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x12, 0x04, 0x6c, 0x6f,
-	0x67, 0x72, 0x22, 0xa4, 0x08, 0x0a, 0x0d, 0x4c, 0x6f, 0x67, 0x72, 0x70, 0x63, 0x50, 0x61, 0x63,
+	0x67, 0x72, 0x22, 0xa4, 0x08, 0x0a, 0x0d, 0x4c, 0x6f, 0x67, 0x52, 0x70, 0x63, 0x50, 0x61, 0x63,
 	0x6b, 0x61, 0x67, 0x65, 0x12, 0x17, 0x0a, 0x07, 0x64, 0x61, 0x73, 0x68, 0x5f, 0x69, 0x64, 0x18,
 	0x01, 0x20, 0x01, 0x28, 0x05, 0x52, 0x06, 0x64, 0x61, 0x73, 0x68, 0x49, 0x64, 0x12, 0x1d, 0x0a,
 	0x0a, 0x70, 0x75, 0x62, 0x6c, 0x69, 0x63, 0x5f, 0x6b, 0x65, 0x79, 0x18, 0x02, 0x20, 0x01, 0x28,
@@ -563,45 +563,45 @@ var file_logr_proto_rawDesc = []byte{
 	0x69, 0x70, 0x68, 0x65, 0x72, 0x5f, 0x63, 0x6f, 0x75, 0x6e, 0x74, 0x18, 0x04, 0x20, 0x01, 0x28,
 	0x0c, 0x52, 0x0b, 0x63, 0x69, 0x70, 0x68, 0x65, 0x72, 0x43, 0x6f, 0x75, 0x6e, 0x74, 0x12, 0x1b,
 	0x0a, 0x09, 0x70, 0x6c, 0x61, 0x69, 0x6e, 0x5f, 0x6c, 0x6f, 0x67, 0x18, 0x05, 0x20, 0x01, 0x28,
-	0x0c, 0x52, 0x08, 0x70, 0x6c, 0x61, 0x69, 0x6e, 0x4c, 0x6f, 0x67, 0x12, 0x10, 0x0a, 0x03, 0x73,
-	0x69, 0x67, 0x18, 0x06, 0x20, 0x01, 0x28, 0x09, 0x52, 0x03, 0x73, 0x69, 0x67, 0x12, 0x29, 0x0a,
-	0x03, 0x6c, 0x6f, 0x67, 0x18, 0x07, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x17, 0x2e, 0x6c, 0x6f, 0x67,
-	0x72, 0x2e, 0x4c, 0x6f, 0x67, 0x72, 0x70, 0x63, 0x50, 0x61, 0x63, 0x6b, 0x61, 0x67, 0x65, 0x2e,
-	0x4c, 0x6f, 0x67, 0x52, 0x03, 0x6c, 0x6f, 0x67, 0x12, 0x2f, 0x0a, 0x05, 0x63, 0x6f, 0x75, 0x6e,
-	0x74, 0x18, 0x08, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x19, 0x2e, 0x6c, 0x6f, 0x67, 0x72, 0x2e, 0x4c,
-	0x6f, 0x67, 0x72, 0x70, 0x63, 0x50, 0x61, 0x63, 0x6b, 0x61, 0x67, 0x65, 0x2e, 0x43, 0x6f, 0x75,
-	0x6e, 0x74, 0x52, 0x05, 0x63, 0x6f, 0x75, 0x6e, 0x74, 0x12, 0x2f, 0x0a, 0x05, 0x63, 0x68, 0x75,
-	0x6e, 0x6b, 0x18, 0x09, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x19, 0x2e, 0x6c, 0x6f, 0x67, 0x72, 0x2e,
-	0x4c, 0x6f, 0x67, 0x72, 0x70, 0x63, 0x50, 0x61, 0x63, 0x6b, 0x61, 0x67, 0x65, 0x2e, 0x43, 0x68,
-	0x75, 0x6e, 0x6b, 0x52, 0x05, 0x63, 0x68, 0x75, 0x6e, 0x6b, 0x1a, 0xec, 0x01, 0x0a, 0x03, 0x4c,
+	0x0c, 0x52, 0x08, 0x70, 0x6c, 0x61, 0x69, 0x6e, 0x4c, 0x6f, 0x67, 0x12, 0x29, 0x0a, 0x03, 0x6c,
+	0x6f, 0x67, 0x18, 0x06, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x17, 0x2e, 0x6c, 0x6f, 0x67, 0x72, 0x2e,
+	0x4c, 0x6f, 0x67, 0x52, 0x70, 0x63, 0x50, 0x61, 0x63, 0x6b, 0x61, 0x67, 0x65, 0x2e, 0x4c, 0x6f,
+	0x67, 0x52, 0x03, 0x6c, 0x6f, 0x67, 0x12, 0x2f, 0x0a, 0x05, 0x63, 0x6f, 0x75, 0x6e, 0x74, 0x18,
+	0x07, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x19, 0x2e, 0x6c, 0x6f, 0x67, 0x72, 0x2e, 0x4c, 0x6f, 0x67,
+	0x52, 0x70, 0x63, 0x50, 0x61, 0x63, 0x6b, 0x61, 0x67, 0x65, 0x2e, 0x43, 0x6f, 0x75, 0x6e, 0x74,
+	0x52, 0x05, 0x63, 0x6f, 0x75, 0x6e, 0x74, 0x12, 0x2f, 0x0a, 0x05, 0x63, 0x68, 0x75, 0x6e, 0x6b,
+	0x18, 0x08, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x19, 0x2e, 0x6c, 0x6f, 0x67, 0x72, 0x2e, 0x4c, 0x6f,
+	0x67, 0x52, 0x70, 0x63, 0x50, 0x61, 0x63, 0x6b, 0x61, 0x67, 0x65, 0x2e, 0x43, 0x68, 0x75, 0x6e,
+	0x6b, 0x52, 0x05, 0x63, 0x68, 0x75, 0x6e, 0x6b, 0x12, 0x10, 0x0a, 0x03, 0x73, 0x69, 0x67, 0x18,
+	0x09, 0x20, 0x01, 0x28, 0x09, 0x52, 0x03, 0x73, 0x69, 0x67, 0x1a, 0xec, 0x01, 0x0a, 0x03, 0x4c,
 	0x6f, 0x67, 0x12, 0x17, 0x0a, 0x07, 0x64, 0x61, 0x73, 0x68, 0x5f, 0x69, 0x64, 0x18, 0x01, 0x20,
-	0x01, 0x28, 0x05, 0x52, 0x06, 0x64, 0x61, 0x73, 0x68, 0x49, 0x64, 0x12, 0x10, 0x0a, 0x03, 0x70,
-	0x69, 0x64, 0x18, 0x02, 0x20, 0x01, 0x28, 0x05, 0x52, 0x03, 0x70, 0x69, 0x64, 0x12, 0x1c, 0x0a,
-	0x09, 0x74, 0x69, 0x6d, 0x65, 0x73, 0x74, 0x61, 0x6d, 0x70, 0x18, 0x03, 0x20, 0x01, 0x28, 0x03,
-	0x52, 0x09, 0x74, 0x69, 0x6d, 0x65, 0x73, 0x74, 0x61, 0x6d, 0x70, 0x12, 0x1a, 0x0a, 0x08, 0x68,
-	0x6f, 0x73, 0x74, 0x6e, 0x61, 0x6d, 0x65, 0x18, 0x04, 0x20, 0x01, 0x28, 0x09, 0x52, 0x08, 0x68,
-	0x6f, 0x73, 0x74, 0x6e, 0x61, 0x6d, 0x65, 0x12, 0x18, 0x0a, 0x07, 0x6c, 0x6f, 0x67, 0x6e, 0x61,
-	0x6d, 0x65, 0x18, 0x05, 0x20, 0x01, 0x28, 0x09, 0x52, 0x07, 0x6c, 0x6f, 0x67, 0x6e, 0x61, 0x6d,
-	0x65, 0x12, 0x14, 0x0a, 0x05, 0x6c, 0x65, 0x76, 0x65, 0x6c, 0x18, 0x06, 0x20, 0x01, 0x28, 0x09,
-	0x52, 0x05, 0x6c, 0x65, 0x76, 0x65, 0x6c, 0x12, 0x18, 0x0a, 0x07, 0x6d, 0x65, 0x73, 0x73, 0x61,
-	0x67, 0x65, 0x18, 0x07, 0x20, 0x01, 0x28, 0x09, 0x52, 0x07, 0x6d, 0x65, 0x73, 0x73, 0x61, 0x67,
-	0x65, 0x12, 0x18, 0x0a, 0x07, 0x76, 0x65, 0x72, 0x73, 0x69, 0x6f, 0x6e, 0x18, 0x09, 0x20, 0x01,
-	0x28, 0x09, 0x52, 0x07, 0x76, 0x65, 0x72, 0x73, 0x69, 0x6f, 0x6e, 0x12, 0x1c, 0x0a, 0x09, 0x69,
-	0x6e, 0x69, 0x74, 0x69, 0x61, 0x74, 0x6f, 0x72, 0x18, 0x0a, 0x20, 0x01, 0x28, 0x09, 0x52, 0x09,
-	0x69, 0x6e, 0x69, 0x74, 0x69, 0x61, 0x74, 0x6f, 0x72, 0x1a, 0xa6, 0x03, 0x0a, 0x05, 0x43, 0x6f,
+	0x01, 0x28, 0x05, 0x52, 0x06, 0x64, 0x61, 0x73, 0x68, 0x49, 0x64, 0x12, 0x1c, 0x0a, 0x09, 0x74,
+	0x69, 0x6d, 0x65, 0x73, 0x74, 0x61, 0x6d, 0x70, 0x18, 0x02, 0x20, 0x01, 0x28, 0x03, 0x52, 0x09,
+	0x74, 0x69, 0x6d, 0x65, 0x73, 0x74, 0x61, 0x6d, 0x70, 0x12, 0x18, 0x0a, 0x07, 0x6c, 0x6f, 0x67,
+	0x6e, 0x61, 0x6d, 0x65, 0x18, 0x03, 0x20, 0x01, 0x28, 0x09, 0x52, 0x07, 0x6c, 0x6f, 0x67, 0x6e,
+	0x61, 0x6d, 0x65, 0x12, 0x1a, 0x0a, 0x08, 0x68, 0x6f, 0x73, 0x74, 0x6e, 0x61, 0x6d, 0x65, 0x18,
+	0x04, 0x20, 0x01, 0x28, 0x09, 0x52, 0x08, 0x68, 0x6f, 0x73, 0x74, 0x6e, 0x61, 0x6d, 0x65, 0x12,
+	0x18, 0x0a, 0x07, 0x76, 0x65, 0x72, 0x73, 0x69, 0x6f, 0x6e, 0x18, 0x05, 0x20, 0x01, 0x28, 0x09,
+	0x52, 0x07, 0x76, 0x65, 0x72, 0x73, 0x69, 0x6f, 0x6e, 0x12, 0x14, 0x0a, 0x05, 0x6c, 0x65, 0x76,
+	0x65, 0x6c, 0x18, 0x06, 0x20, 0x01, 0x28, 0x09, 0x52, 0x05, 0x6c, 0x65, 0x76, 0x65, 0x6c, 0x12,
+	0x18, 0x0a, 0x07, 0x6d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x18, 0x07, 0x20, 0x01, 0x28, 0x09,
+	0x52, 0x07, 0x6d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x12, 0x1c, 0x0a, 0x09, 0x69, 0x6e, 0x69,
+	0x74, 0x69, 0x61, 0x74, 0x6f, 0x72, 0x18, 0x08, 0x20, 0x01, 0x28, 0x09, 0x52, 0x09, 0x69, 0x6e,
+	0x69, 0x74, 0x69, 0x61, 0x74, 0x6f, 0x72, 0x12, 0x10, 0x0a, 0x03, 0x70, 0x69, 0x64, 0x18, 0x09,
+	0x20, 0x01, 0x28, 0x05, 0x52, 0x03, 0x70, 0x69, 0x64, 0x1a, 0xa6, 0x03, 0x0a, 0x05, 0x43, 0x6f,
 	0x75, 0x6e, 0x74, 0x12, 0x17, 0x0a, 0x07, 0x64, 0x61, 0x73, 0x68, 0x5f, 0x69, 0x64, 0x18, 0x01,
 	0x20, 0x01, 0x28, 0x05, 0x52, 0x06, 0x64, 0x61, 0x73, 0x68, 0x49, 0x64, 0x12, 0x1c, 0x0a, 0x09,
 	0x74, 0x69, 0x6d, 0x65, 0x73, 0x74, 0x61, 0x6d, 0x70, 0x18, 0x02, 0x20, 0x01, 0x28, 0x03, 0x52,
-	0x09, 0x74, 0x69, 0x6d, 0x65, 0x73, 0x74, 0x61, 0x6d, 0x70, 0x12, 0x1a, 0x0a, 0x08, 0x68, 0x6f,
-	0x73, 0x74, 0x6e, 0x61, 0x6d, 0x65, 0x18, 0x03, 0x20, 0x01, 0x28, 0x09, 0x52, 0x08, 0x68, 0x6f,
-	0x73, 0x74, 0x6e, 0x61, 0x6d, 0x65, 0x12, 0x18, 0x0a, 0x07, 0x76, 0x65, 0x72, 0x73, 0x69, 0x6f,
-	0x6e, 0x18, 0x04, 0x20, 0x01, 0x28, 0x09, 0x52, 0x07, 0x76, 0x65, 0x72, 0x73, 0x69, 0x6f, 0x6e,
-	0x12, 0x18, 0x0a, 0x07, 0x6c, 0x6f, 0x67, 0x6e, 0x61, 0x6d, 0x65, 0x18, 0x05, 0x20, 0x01, 0x28,
-	0x09, 0x52, 0x07, 0x6c, 0x6f, 0x67, 0x6e, 0x61, 0x6d, 0x65, 0x12, 0x18, 0x0a, 0x07, 0x6b, 0x65,
+	0x09, 0x74, 0x69, 0x6d, 0x65, 0x73, 0x74, 0x61, 0x6d, 0x70, 0x12, 0x18, 0x0a, 0x07, 0x6c, 0x6f,
+	0x67, 0x6e, 0x61, 0x6d, 0x65, 0x18, 0x03, 0x20, 0x01, 0x28, 0x09, 0x52, 0x07, 0x6c, 0x6f, 0x67,
+	0x6e, 0x61, 0x6d, 0x65, 0x12, 0x1a, 0x0a, 0x08, 0x68, 0x6f, 0x73, 0x74, 0x6e, 0x61, 0x6d, 0x65,
+	0x18, 0x04, 0x20, 0x01, 0x28, 0x09, 0x52, 0x08, 0x68, 0x6f, 0x73, 0x74, 0x6e, 0x61, 0x6d, 0x65,
+	0x12, 0x18, 0x0a, 0x07, 0x76, 0x65, 0x72, 0x73, 0x69, 0x6f, 0x6e, 0x18, 0x05, 0x20, 0x01, 0x28,
+	0x09, 0x52, 0x07, 0x76, 0x65, 0x72, 0x73, 0x69, 0x6f, 0x6e, 0x12, 0x18, 0x0a, 0x07, 0x6b, 0x65,
 	0x79, 0x6e, 0x61, 0x6d, 0x65, 0x18, 0x06, 0x20, 0x01, 0x28, 0x09, 0x52, 0x07, 0x6b, 0x65, 0x79,
 	0x6e, 0x61, 0x6d, 0x65, 0x12, 0x3b, 0x0a, 0x07, 0x6d, 0x65, 0x74, 0x72, 0x69, 0x63, 0x73, 0x18,
 	0x07, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x21, 0x2e, 0x6c, 0x6f, 0x67, 0x72, 0x2e, 0x4c, 0x6f, 0x67,
-	0x72, 0x70, 0x63, 0x50, 0x61, 0x63, 0x6b, 0x61, 0x67, 0x65, 0x2e, 0x43, 0x6f, 0x75, 0x6e, 0x74,
+	0x52, 0x70, 0x63, 0x50, 0x61, 0x63, 0x6b, 0x61, 0x67, 0x65, 0x2e, 0x43, 0x6f, 0x75, 0x6e, 0x74,
 	0x2e, 0x4d, 0x65, 0x74, 0x72, 0x69, 0x63, 0x73, 0x52, 0x07, 0x6d, 0x65, 0x74, 0x72, 0x69, 0x63,
 	0x73, 0x1a, 0xbe, 0x01, 0x0a, 0x07, 0x4d, 0x65, 0x74, 0x72, 0x69, 0x63, 0x73, 0x12, 0x10, 0x0a,
 	0x03, 0x69, 0x6e, 0x63, 0x18, 0x01, 0x20, 0x01, 0x28, 0x02, 0x52, 0x03, 0x69, 0x6e, 0x63, 0x12,
@@ -620,9 +620,9 @@ var file_logr_proto_rawDesc = []byte{
 	0x02, 0x74, 0x73, 0x18, 0x02, 0x20, 0x01, 0x28, 0x03, 0x52, 0x02, 0x74, 0x73, 0x12, 0x0c, 0x0a,
 	0x01, 0x69, 0x18, 0x03, 0x20, 0x01, 0x28, 0x05, 0x52, 0x01, 0x69, 0x12, 0x0c, 0x0a, 0x01, 0x6e,
 	0x18, 0x04, 0x20, 0x01, 0x28, 0x05, 0x52, 0x01, 0x6e, 0x22, 0x0a, 0x0a, 0x08, 0x52, 0x65, 0x73,
-	0x70, 0x6f, 0x6e, 0x73, 0x65, 0x32, 0x35, 0x0a, 0x06, 0x4c, 0x6f, 0x67, 0x72, 0x70, 0x63, 0x12,
+	0x70, 0x6f, 0x6e, 0x73, 0x65, 0x32, 0x35, 0x0a, 0x06, 0x4c, 0x6f, 0x67, 0x52, 0x70, 0x63, 0x12,
 	0x2b, 0x0a, 0x04, 0x50, 0x75, 0x73, 0x68, 0x12, 0x13, 0x2e, 0x6c, 0x6f, 0x67, 0x72, 0x2e, 0x4c,
-	0x6f, 0x67, 0x72, 0x70, 0x63, 0x50, 0x61, 0x63, 0x6b, 0x61, 0x67, 0x65, 0x1a, 0x0e, 0x2e, 0x6c,
+	0x6f, 0x67, 0x52, 0x70, 0x63, 0x50, 0x61, 0x63, 0x6b, 0x61, 0x67, 0x65, 0x1a, 0x0e, 0x2e, 0x6c,
 	0x6f, 0x67, 0x72, 0x2e, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x42, 0x1e, 0x5a, 0x1c,
 	0x6b, 0x6f, 0x7a, 0x68, 0x75, 0x72, 0x6b, 0x69, 0x6e, 0x2e, 0x6c, 0x6f, 0x67, 0x72, 0x70, 0x63,
 	0x2e, 0x76, 0x31, 0x3b, 0x6c, 0x6f, 0x67, 0x72, 0x70, 0x63, 0x76, 0x31, 0x62, 0x06, 0x70, 0x72,
@@ -643,20 +643,20 @@ func file_logr_proto_rawDescGZIP() []byte {
 
 var file_logr_proto_msgTypes = make([]protoimpl.MessageInfo, 6)
 var file_logr_proto_goTypes = []interface{}{
-	(*LogrpcPackage)(nil),               // 0: logr.LogrpcPackage
+	(*LogRpcPackage)(nil),               // 0: logr.LogRpcPackage
 	(*Response)(nil),                    // 1: logr.Response
-	(*LogrpcPackage_Log)(nil),           // 2: logr.LogrpcPackage.Log
-	(*LogrpcPackage_Count)(nil),         // 3: logr.LogrpcPackage.Count
-	(*LogrpcPackage_Chunk)(nil),         // 4: logr.LogrpcPackage.Chunk
-	(*LogrpcPackage_Count_Metrics)(nil), // 5: logr.LogrpcPackage.Count.Metrics
+	(*LogRpcPackage_Log)(nil),           // 2: logr.LogRpcPackage.Log
+	(*LogRpcPackage_Count)(nil),         // 3: logr.LogRpcPackage.Count
+	(*LogRpcPackage_Chunk)(nil),         // 4: logr.LogRpcPackage.Chunk
+	(*LogRpcPackage_Count_Metrics)(nil), // 5: logr.LogRpcPackage.Count.Metrics
 }
 var file_logr_proto_depIdxs = []int32{
-	2, // 0: logr.LogrpcPackage.log:type_name -> logr.LogrpcPackage.Log
-	3, // 1: logr.LogrpcPackage.count:type_name -> logr.LogrpcPackage.Count
-	4, // 2: logr.LogrpcPackage.chunk:type_name -> logr.LogrpcPackage.Chunk
-	5, // 3: logr.LogrpcPackage.Count.metrics:type_name -> logr.LogrpcPackage.Count.Metrics
-	0, // 4: logr.Logrpc.Push:input_type -> logr.LogrpcPackage
-	1, // 5: logr.Logrpc.Push:output_type -> logr.Response
+	2, // 0: logr.LogRpcPackage.log:type_name -> logr.LogRpcPackage.Log
+	3, // 1: logr.LogRpcPackage.count:type_name -> logr.LogRpcPackage.Count
+	4, // 2: logr.LogRpcPackage.chunk:type_name -> logr.LogRpcPackage.Chunk
+	5, // 3: logr.LogRpcPackage.Count.metrics:type_name -> logr.LogRpcPackage.Count.Metrics
+	0, // 4: logr.LogRpc.Push:input_type -> logr.LogRpcPackage
+	1, // 5: logr.LogRpc.Push:output_type -> logr.Response
 	5, // [5:6] is the sub-list for method output_type
 	4, // [4:5] is the sub-list for method input_type
 	4, // [4:4] is the sub-list for extension type_name
@@ -671,7 +671,7 @@ func file_logr_proto_init() {
 	}
 	if !protoimpl.UnsafeEnabled {
 		file_logr_proto_msgTypes[0].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*LogrpcPackage); i {
+			switch v := v.(*LogRpcPackage); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -695,7 +695,7 @@ func file_logr_proto_init() {
 			}
 		}
 		file_logr_proto_msgTypes[2].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*LogrpcPackage_Log); i {
+			switch v := v.(*LogRpcPackage_Log); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -707,7 +707,7 @@ func file_logr_proto_init() {
 			}
 		}
 		file_logr_proto_msgTypes[3].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*LogrpcPackage_Count); i {
+			switch v := v.(*LogRpcPackage_Count); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -719,7 +719,7 @@ func file_logr_proto_init() {
 			}
 		}
 		file_logr_proto_msgTypes[4].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*LogrpcPackage_Chunk); i {
+			switch v := v.(*LogRpcPackage_Chunk); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -731,7 +731,7 @@ func file_logr_proto_init() {
 			}
 		}
 		file_logr_proto_msgTypes[5].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*LogrpcPackage_Count_Metrics); i {
+			switch v := v.(*LogRpcPackage_Count_Metrics); i {
 			case 0:
 				return &v.state
 			case 1:

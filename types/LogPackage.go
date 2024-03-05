@@ -53,8 +53,8 @@ func (lp *LogPackage) ProtoBytes() []byte {
 	return res
 }
 
-func (lp *LogPackage) Proto() *pb.LogrpcPackage {
-	res := &pb.LogrpcPackage{
+func (lp *LogPackage) Proto() *pb.LogRpcPackage {
+	res := &pb.LogRpcPackage{
 		DashId:      int32(lp.DashId),
 		PublicKey:   lp.PublicKey,
 		CipherLog:   lp.CipherLog,
@@ -62,7 +62,7 @@ func (lp *LogPackage) Proto() *pb.LogrpcPackage {
 		PlainLog:    lp.PlainLog,
 	}
 	if lp.Log != nil {
-		res.Log = &pb.LogrpcPackage_Log{
+		res.Log = &pb.LogRpcPackage_Log{
 			DashId:    int32(lp.Log.DashId),
 			Pid:       int32(lp.Log.Pid),
 			Timestamp: lp.Log.Timestamp,
@@ -75,14 +75,14 @@ func (lp *LogPackage) Proto() *pb.LogrpcPackage {
 		}
 	}
 	if lp.Count != nil {
-		res.Count = &pb.LogrpcPackage_Count{
+		res.Count = &pb.LogRpcPackage_Count{
 			DashId:    int32(lp.Log.DashId),
 			Timestamp: lp.Count.Timestamp,
 			Hostname:  lp.Count.Hostname,
 			Version:   lp.Count.Version,
 			Logname:   lp.Count.Logname,
 			Keyname:   lp.Count.Keyname,
-			Metrics:   &pb.LogrpcPackage_Count_Metrics{},
+			Metrics:   &pb.LogRpcPackage_Count_Metrics{},
 		}
 		if v := lp.Count.Metrics.Inc; v != nil {
 			res.Count.Metrics.Inc = float32(v.Val)
