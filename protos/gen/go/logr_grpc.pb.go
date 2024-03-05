@@ -4,7 +4,7 @@
 // - protoc             v4.25.3
 // source: logr.proto
 
-package logrv1
+package logrpcv1
 
 import (
 	context "context"
@@ -18,86 +18,86 @@ import (
 // Requires gRPC-Go v1.32.0 or later.
 const _ = grpc.SupportPackageIsVersion7
 
-// LogrClient is the client API for Logr service.
+// LogrpcClient is the client API for Logrpc service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
-type LogrClient interface {
-	Push(ctx context.Context, in *LogPackage, opts ...grpc.CallOption) (*Response, error)
+type LogrpcClient interface {
+	Push(ctx context.Context, in *LogrpcPackage, opts ...grpc.CallOption) (*Response, error)
 }
 
-type logrClient struct {
+type logrpcClient struct {
 	cc grpc.ClientConnInterface
 }
 
-func NewLogrClient(cc grpc.ClientConnInterface) LogrClient {
-	return &logrClient{cc}
+func NewLogrpcClient(cc grpc.ClientConnInterface) LogrpcClient {
+	return &logrpcClient{cc}
 }
 
-func (c *logrClient) Push(ctx context.Context, in *LogPackage, opts ...grpc.CallOption) (*Response, error) {
+func (c *logrpcClient) Push(ctx context.Context, in *LogrpcPackage, opts ...grpc.CallOption) (*Response, error) {
 	out := new(Response)
-	err := c.cc.Invoke(ctx, "/logr.Logr/Push", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/logr.Logrpc/Push", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-// LogrServer is the server API for Logr service.
-// All implementations must embed UnimplementedLogrServer
+// LogrpcServer is the server API for Logrpc service.
+// All implementations must embed UnimplementedLogrpcServer
 // for forward compatibility
-type LogrServer interface {
-	Push(context.Context, *LogPackage) (*Response, error)
-	mustEmbedUnimplementedLogrServer()
+type LogrpcServer interface {
+	Push(context.Context, *LogrpcPackage) (*Response, error)
+	mustEmbedUnimplementedLogrpcServer()
 }
 
-// UnimplementedLogrServer must be embedded to have forward compatible implementations.
-type UnimplementedLogrServer struct {
+// UnimplementedLogrpcServer must be embedded to have forward compatible implementations.
+type UnimplementedLogrpcServer struct {
 }
 
-func (UnimplementedLogrServer) Push(context.Context, *LogPackage) (*Response, error) {
+func (UnimplementedLogrpcServer) Push(context.Context, *LogrpcPackage) (*Response, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Push not implemented")
 }
-func (UnimplementedLogrServer) mustEmbedUnimplementedLogrServer() {}
+func (UnimplementedLogrpcServer) mustEmbedUnimplementedLogrpcServer() {}
 
-// UnsafeLogrServer may be embedded to opt out of forward compatibility for this service.
-// Use of this interface is not recommended, as added methods to LogrServer will
+// UnsafeLogrpcServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to LogrpcServer will
 // result in compilation errors.
-type UnsafeLogrServer interface {
-	mustEmbedUnimplementedLogrServer()
+type UnsafeLogrpcServer interface {
+	mustEmbedUnimplementedLogrpcServer()
 }
 
-func RegisterLogrServer(s grpc.ServiceRegistrar, srv LogrServer) {
-	s.RegisterService(&Logr_ServiceDesc, srv)
+func RegisterLogrpcServer(s grpc.ServiceRegistrar, srv LogrpcServer) {
+	s.RegisterService(&Logrpc_ServiceDesc, srv)
 }
 
-func _Logr_Push_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(LogPackage)
+func _Logrpc_Push_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(LogrpcPackage)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(LogrServer).Push(ctx, in)
+		return srv.(LogrpcServer).Push(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/logr.Logr/Push",
+		FullMethod: "/logr.Logrpc/Push",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(LogrServer).Push(ctx, req.(*LogPackage))
+		return srv.(LogrpcServer).Push(ctx, req.(*LogrpcPackage))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-// Logr_ServiceDesc is the grpc.ServiceDesc for Logr service.
+// Logrpc_ServiceDesc is the grpc.ServiceDesc for Logrpc service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
-var Logr_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "logr.Logr",
-	HandlerType: (*LogrServer)(nil),
+var Logrpc_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "logr.Logrpc",
+	HandlerType: (*LogrpcServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
 			MethodName: "Push",
-			Handler:    _Logr_Push_Handler,
+			Handler:    _Logrpc_Push_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

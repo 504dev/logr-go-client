@@ -2,13 +2,13 @@ syntax = "proto3";
 
 package logr;
 
-option go_package = "kozhurkin.logr.v1;logrv1";
+option go_package = "kozhurkin.logrpc.v1;logrpcv1";
 
-service Logr {
-  rpc Push (LogPackage) returns (Response);
+service Logrpc {
+  rpc Push (LogrpcPackage) returns (Response);
 }
 
-message LogPackage {
+message LogrpcPackage {
   int32 dash_id = 1;
   string public_key = 2;
   bytes cipher_log = 3;

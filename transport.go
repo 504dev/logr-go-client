@@ -15,7 +15,7 @@ type Transport struct {
 	*Config
 	net.Conn
 	GrpcConn   *grpc.ClientConn
-	GrpcClient pb.LogrClient
+	GrpcClient pb.LogrpcClient
 }
 
 func (conn *Transport) Connect(conf *Config) error {
@@ -24,7 +24,7 @@ func (conn *Transport) Connect(conf *Config) error {
 		conn.Conn, err = net.Dial("udp", conf.Udp)
 	} else {
 		conn.GrpcConn, err = grpc.Dial(conf.Grpc, grpc.WithTransportCredentials(insecure.NewCredentials()))
-		conn.GrpcClient = pb.NewLogrClient(conn.GrpcConn)
+		conn.GrpcClient = pb.NewLogrpcClient(conn.GrpcConn)
 	}
 	conn.Config = conf
 	return err
