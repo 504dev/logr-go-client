@@ -208,30 +208,30 @@ func (lp *LogPackage) FromProto(lrp *pb.LogRpcPackage) {
 			Keyname:   lrp.Count.Keyname,
 			Metrics:   Metrics{},
 		}
-		if v := lrp.Count.Metrics.Inc; v != 0 {
-			lp.Count.Inc(float64(v))
+		if v := lrp.Count.Inc; v != nil {
+			lp.Count.Inc(v.Inc)
 		}
-		if v := lrp.Count.Metrics.Max; v != 0 {
-			lp.Count.Max(float64(v))
+		if v := lrp.Count.Max; v != nil {
+			lp.Count.Max(v.Max)
 		}
-		if v := lrp.Count.Metrics.Min; v != 0 {
-			lp.Count.Min(float64(v))
+		if v := lrp.Count.Min; v != nil {
+			lp.Count.Min(v.Min)
 		}
-		if s, n := lrp.Count.Metrics.AvgSum, lrp.Count.Metrics.AvgNum; s != 0 && n != 0 {
-			lp.Count.Metrics.Avg = &Avg{float64(s), int(n)}
+		if v := lrp.Count.Avg; v != nil {
+			lp.Count.Metrics.Avg = &Avg{v.Sum, int(v.Num)}
 		}
-		if s, t := lrp.Count.Metrics.PerTkn, lrp.Count.Metrics.PerTtl; s != 0 && t != 0 {
-			lp.Count.Metrics.Per = &Per{float64(s), float64(t)}
+		if v := lrp.Count.Per; v != nil {
+			lp.Count.Metrics.Per = &Per{v.Taken, v.Total}
 		}
-		if v := lrp.Count.Metrics.TimeDur; v != 0 {
-			lp.Count.Metrics.Time = &Time{int64(v)}
+		if v := lrp.Count.Time; v != nil {
+			lp.Count.Metrics.Time = &Time{v.Duration}
 		}
 	}
 }
 
 func (lp *LogPackage) Proto() *pb.LogRpcPackage {
 	res := &pb.LogRpcPackage{
-		DashId:      int32(lp.DashId),
+		DashId:      uint32(lp.DashId),
 		PublicKey:   lp.PublicKey,
 		CipherLog:   lp.CipherLog,
 		CipherCount: lp.CipherCount,
@@ -239,8 +239,8 @@ func (lp *LogPackage) Proto() *pb.LogRpcPackage {
 	}
 	if lp.Log != nil {
 		res.Log = &pb.LogRpcPackage_Log{
-			DashId:    int32(lp.Log.DashId),
-			Pid:       int32(lp.Log.Pid),
+			DashId:    uint32(lp.Log.DashId),
+			Pid:       uint32(lp.Log.Pid),
 			Timestamp: lp.Log.Timestamp,
 			Hostname:  lp.Log.Hostname,
 			Logname:   lp.Log.Logname,
@@ -252,33 +252,30 @@ func (lp *LogPackage) Proto() *pb.LogRpcPackage {
 	}
 	if lp.Count != nil {
 		res.Count = &pb.LogRpcPackage_Count{
-			DashId:    int32(lp.Log.DashId),
+			DashId:    uint32(lp.Log.DashId),
 			Timestamp: lp.Count.Timestamp,
 			Hostname:  lp.Count.Hostname,
 			Version:   lp.Count.Version,
 			Logname:   lp.Count.Logname,
 			Keyname:   lp.Count.Keyname,
-			Metrics:   &pb.LogRpcPackage_Count_Metrics{},
 		}
 		if v := lp.Count.Metrics.Inc; v != nil {
-			res.Count.Metrics.Inc = float32(v.Val)
+			res.Count.Inc = &pb.LogRpcPackage_Count_Inc{Inc: v.Val}
 		}
 		if v := lp.Count.Metrics.Max; v != nil {
-			res.Count.Metrics.Max = float32(v.Val)
+			res.Count.Max = &pb.LogRpcPackage_Count_Max{Max: v.Val}
 		}
 		if v := lp.Count.Metrics.Min; v != nil {
-			res.Count.Metrics.Min = float32(v.Val)
+			res.Count.Min = &pb.LogRpcPackage_Count_Min{Min: v.Val}
 		}
 		if v := lp.Count.Metrics.Avg; v != nil {
-			res.Count.Metrics.AvgSum = float32(v.Sum)
-			res.Count.Metrics.AvgNum = int32(v.Num)
+			res.Count.Avg = &pb.LogRpcPackage_Count_Avg{Sum: v.Sum, Num: uint32(v.Num)}
 		}
 		if v := lp.Count.Metrics.Per; v != nil {
-			res.Count.Metrics.PerTkn = float32(v.Taken)
-			res.Count.Metrics.PerTtl = float32(v.Total)
+			res.Count.Per = &pb.LogRpcPackage_Count_Per{Taken: v.Taken, Total: v.Total}
 		}
 		if v := lp.Count.Metrics.Time; v != nil {
-			res.Count.Metrics.TimeDur = int32(v.Duration)
+			res.Count.Time = &pb.LogRpcPackage_Count_Time{Duration: v.Duration}
 		}
 	}
 	return res

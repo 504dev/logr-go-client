@@ -9,7 +9,7 @@ service LogRpc {
 }
 
 message LogRpcPackage {
-  int32 dash_id = 1;
+  uint32 dash_id = 1;
   string public_key = 2;
   bytes cipher_log = 3;
   bytes cipher_count = 4;
@@ -19,7 +19,7 @@ message LogRpcPackage {
   Chunk chunk = 8;
   string sig = 9;
   message Log {
-    int32 dash_id = 1;
+    uint32 dash_id = 1;
     int64 timestamp = 2;
     string logname = 3;
     string hostname = 4;
@@ -27,32 +27,47 @@ message LogRpcPackage {
     string level = 6;
     string message = 7;
     string initiator = 8;
-    int32 pid = 9;
+    uint32 pid = 9;
   }
   message Count {
-    int32 dash_id = 1;
+    uint32 dash_id = 1;
     int64 timestamp = 2;
     string logname = 3;
     string hostname = 4;
     string version = 5;
     string keyname = 6;
-    Metrics metrics = 7;
-    message Metrics {
-      float inc = 1;
-      float max = 2;
-      float min = 3;
-      float avg_sum = 4;
-      int32 avg_num = 5;
-      float per_tkn = 6;
-      float per_ttl = 7;
-      int32 time_dur = 8;
+    Inc inc = 7;
+    Max max = 8;
+    Min min = 9;
+    Avg avg = 10;
+    Per per = 11;
+    Time time = 12;
+    message Inc {
+      double inc = 1;
+    }
+    message Max {
+      double max = 1;
+    }
+    message Min {
+      double min = 1;
+    }
+    message Avg {
+      double sum = 1;
+      uint32 num = 2;
+    }
+    message Per {
+      double taken = 1;
+      double total = 2;
+    }
+    message Time {
+      int64 duration = 1;
     }
   }
   message Chunk {
     string uid = 1;
     int64 ts = 2;
-    int32 i = 3;
-    int32 n = 4;
+    uint32 i = 3;
+    uint32 n = 4;
   }
 }
 
