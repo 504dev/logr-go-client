@@ -8,6 +8,7 @@ import (
 	"github.com/504dev/logr-go-client/cipher"
 	"github.com/504dev/logr-go-client/helpers"
 	pb "github.com/504dev/logr-go-client/protos/gen/go"
+	"github.com/golang/protobuf/proto"
 	"time"
 )
 
@@ -47,7 +48,12 @@ type LogPackage struct {
 	Chunk       *ChunkInfo `json:"chunk"`
 }
 
-func (lp *LogPackage) PB() *pb.LogPackage {
+func (lp *LogPackage) ProtoBytes() []byte {
+	res, _ := proto.Marshal(lp.Proto())
+	return res
+}
+
+func (lp *LogPackage) Proto() *pb.LogPackage {
 	res := &pb.LogPackage{
 		DashId:      int32(lp.DashId),
 		PublicKey:   lp.PublicKey,

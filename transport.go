@@ -41,7 +41,8 @@ func (conn *Transport) Close() error {
 func (conn *Transport) pushGrpc(lp *types.LogPackage) (int, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
-	req := lp.PB()
+	//fmt.Println(string(lp.ProtoBytes()), len(lp.ProtoBytes()))
+	req := lp.Proto()
 	_, err := conn.GrpcClient.Push(ctx, req)
 	if err != nil {
 		return 0, err
@@ -84,6 +85,7 @@ func (conn *Transport) PushLog(log *types.Log) (int, error) {
 	}
 
 	for i, chunk := range chunks {
+		//fmt.Println(string(chunk), len(chunk))
 		_, err = conn.Conn.Write(chunk)
 		if err != nil {
 			return i, err
