@@ -4,6 +4,7 @@ go 1.17
 
 require (
 	github.com/fatih/color v1.9.0
+	github.com/goccy/go-json v0.10.2
 	github.com/shirou/gopsutil/v3 v3.23.10
 	google.golang.org/grpc v1.57.2
 	google.golang.org/protobuf v1.32.0
@@ -11,7 +12,6 @@ require (
 
 require (
 	github.com/go-ole/go-ole v1.2.6 // indirect
-	github.com/goccy/go-json v0.10.2 // indirect
 	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/lufia/plan9stats v0.0.0-20211012122336-39d0f177ccd0 // indirect
 	github.com/mattn/go-colorable v0.1.4 // indirect

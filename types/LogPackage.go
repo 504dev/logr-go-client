@@ -8,7 +8,7 @@ import (
 	"github.com/504dev/logr-go-client/helpers"
 	pb "github.com/504dev/logr-go-client/protos/gen/go"
 	gojson "github.com/goccy/go-json"
-	"github.com/golang/protobuf/proto"
+	"google.golang.org/protobuf/proto"
 	"time"
 )
 
