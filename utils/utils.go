@@ -55,12 +55,9 @@ func Initiator() (string, string) {
 	initiator := strings.TrimSpace(stackSplitted[12])
 
 	start, end := strings.LastIndex(caller, "/"), strings.LastIndex(caller, "(")
-	if start == -1 {
-		start = 0
-	}
-	callerSplitted := strings.Split(caller[start:end], ".")
+	callerSplitted := strings.Split(caller[start+1:end], ".")
 	if length := len(callerSplitted); length > 2 {
-		callerSplitted = callerSplitted[length-3 : length-1]
+		callerSplitted = callerSplitted[length-2 : length]
 	}
 	caller = strings.Join(callerSplitted, ".")
 
