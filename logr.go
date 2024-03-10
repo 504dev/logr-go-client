@@ -113,10 +113,12 @@ func (lg *Logger) prefix(level string) string {
 
 func (lg *Logger) body(msg string) string {
 	res := lg.Body
+	initiator, caller := utils.Initiator()
 	res = strings.Replace(res, "{logname}", lg.Logname, -1)
 	res = strings.Replace(res, "{version}", lg.GetVersion(), -1)
 	res = strings.Replace(res, "{pid}", strconv.Itoa(lg.GetPid()), -1)
-	res = strings.Replace(res, "{initiator}", utils.Initiator(), -1)
+	res = strings.Replace(res, "{initiator}", initiator, -1)
+	res = strings.Replace(res, "{caller}", caller, -1)
 	res = strings.Replace(res, "{message}", msg, -1)
 	return res
 }

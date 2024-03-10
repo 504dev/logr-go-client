@@ -48,11 +48,13 @@ func ReadGitTagDir(dir string) string {
 	return ""
 }
 
-func Initiator() string {
+func Initiator() (string, string) {
 	stack := string(debug.Stack())
-	caller := strings.TrimSpace(strings.Split(stack, "\n")[12])
-	splitted := regexp.MustCompile(`[\s\/]+`).Split(caller, 20)
-	length := len(splitted)
-	caller = strings.Join(splitted[length-3:length-1], "/")
-	return caller
+	stackSplitted := strings.Split(stack, "\n")
+	caller := strings.TrimSpace(stackSplitted[11])
+	initiator := strings.TrimSpace(stackSplitted[12])
+	callerSplitted := regexp.MustCompile(`[\s\/]+`).Split(initiator, 20)
+	length := len(callerSplitted)
+	initiator = strings.Join(callerSplitted[length-3:length-1], "/")
+	return initiator, caller
 }
