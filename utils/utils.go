@@ -54,12 +54,19 @@ func Initiator() (string, string) {
 	caller := strings.TrimSpace(stackSplitted[11])
 	initiator := strings.TrimSpace(stackSplitted[12])
 
-	callerSplitted := strings.Split(caller, "/")
-	caller = callerSplitted[len(callerSplitted)-1]
-	caller = regexp.MustCompile(`\(.*\)`).ReplaceAllString(caller, ``)
+	start, end := strings.LastIndex(caller, "/"), strings.LastIndex(caller, "(")
+	if start == -1 {
+		start = 0
+	}
+	callerSplitted := strings.Split(caller[start:end], ".")
+	if length := len(callerSplitted); length > 2 {
+		callerSplitted = callerSplitted[length-3 : length-1]
+	}
+	caller = strings.Join(callerSplitted, ".")
 
 	initiatorSplitted := regexp.MustCompile(`[\s/]+`).Split(initiator, 20)
 	length := len(initiatorSplitted)
 	initiator = strings.Join(initiatorSplitted[length-3:length-1], "/")
+
 	return initiator, caller
 }
