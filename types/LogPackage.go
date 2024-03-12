@@ -37,11 +37,11 @@ func (ch *ChunkInfo) CalcSig(privBase64 string) (signatureBase64 string, err err
 }
 
 type LogPackage struct {
-	DashId      int                    `json:"dash_id,omitempty"`
-	PublicKey   string                 `json:"public_key"`
-	CipherLog   []byte                 `json:"cipher_log,omitempty"`
-	CipherCount []byte                 `json:"cipher_count,omitempty"`
-	PlainLog    []byte                 `json:"_log,omitempty"`
+	DashId      int    `json:"dash_id,omitempty"`
+	PublicKey   string `json:"public_key"`
+	CipherLog   []byte `json:"cipher_log,omitempty"`
+	CipherCount []byte `json:"cipher_count,omitempty"`
+	PlainLog    []byte `json:"_log,omitempty"`
 	*Log        `json:"log,omitempty"` // field do not support long messages over udp
 	*Count      `json:"count,omitempty"`
 	Sig         string     `json:"sig,omitempty"`
@@ -128,9 +128,9 @@ func (lp *LogPackage) Chunkify(n int, priv string) ([][]byte, error) {
 	} else {
 		data = lp.PlainLog
 	}
-	logmsg, _ := gojson.Marshal(data)
-	headSize := len(msg) - len(logmsg)
-	chunkSize := int(float32(n-headSize) * 0.74)
+	logSize := base64.StdEncoding.EncodedLen(len(data))
+	headSize := len(msg) - logSize
+	chunkSize := int(float32(n-headSize) * 0.749)
 	chunks := helpers.ChunkifyBytes(data, chunkSize)
 	result := make([][]byte, len(chunks))
 

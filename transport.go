@@ -85,8 +85,8 @@ func (conn *Transport) PushLog(log *types.Log) (int, error) {
 	}
 
 	for i, chunk := range chunks {
-		//fmt.Println(string(chunk), len(chunk))
 		_, err = conn.Conn.Write(chunk)
+		//fmt.Println(err, len(chunk))
 		if err != nil {
 			return i, err
 		}
