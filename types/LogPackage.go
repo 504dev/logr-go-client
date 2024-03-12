@@ -128,9 +128,10 @@ func (lp *LogPackage) Chunkify(n int, priv string) ([][]byte, error) {
 	} else {
 		data = lp.PlainLog
 	}
-	headSize := len(msg) - len(data)
-	chunkSize := n - headSize
-	chunks := helpers.ChunkifyString(data, chunkSize)
+	logmsg, _ := gojson.Marshal(data)
+	headSize := len(msg) - len(logmsg)
+	chunkSize := int(float32(n-headSize) * 0.74)
+	chunks := helpers.ChunkifyBytes(data, chunkSize)
 	result := make([][]byte, len(chunks))
 
 	for i, chunk := range chunks {
