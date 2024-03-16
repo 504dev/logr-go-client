@@ -84,6 +84,13 @@ func (lg *Logger) CustomWriter(f func(log *Log)) *Writer {
 	}
 }
 
+var colorCrit = color.New(color.FgRed).SprintFunc()
+var colorError = color.New(color.FgHiRed).SprintFunc()
+var colorWarn = color.New(color.FgYellow).SprintFunc()
+var colorNotice = color.New(color.FgHiGreen).SprintFunc()
+var colorInfo = color.New(color.FgGreen).SprintFunc()
+var colorDebug = color.New(color.FgBlue).SprintFunc()
+
 func (lg *Logger) prefix(level string) string {
 	dt := time.Now().Format(time.RFC3339)
 	flevel := level
@@ -93,17 +100,17 @@ func (lg *Logger) prefix(level string) string {
 	case LevelAlert:
 		fallthrough
 	case LevelCrit:
-		flevel = color.New(color.FgHiRed).SprintFunc()(level)
+		flevel = colorCrit(level)
 	case LevelError:
-		flevel = color.New(color.FgRed).SprintFunc()(level)
+		flevel = colorError(level)
 	case LevelWarn:
-		flevel = color.New(color.FgYellow).SprintFunc()(level)
+		flevel = colorWarn(level)
 	case LevelNotice:
-		flevel = color.New(color.FgHiGreen).SprintFunc()(level)
+		flevel = colorNotice(level)
 	case LevelInfo:
-		flevel = color.New(color.FgGreen).SprintFunc()(level)
+		flevel = colorInfo(level)
 	case LevelDebug:
-		flevel = color.New(color.FgBlue).SprintFunc()(level)
+		flevel = colorDebug(level)
 	}
 	res := lg.Prefix
 	res = strings.Replace(res, "{time}", dt, -1)
