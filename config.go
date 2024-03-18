@@ -33,10 +33,7 @@ func (c *Config) NewLogger(logname string) (*Logger, error) {
 		Console: true,
 	}
 	err := logger.Connect(c)
-	if err != nil {
-		return logger, err
-	}
-	logger.Counter, err = c.NewCounter(logname)
+	logger.Counter, _ = c.NewCounter(logname)
 	return logger, err
 }
 

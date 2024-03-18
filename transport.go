@@ -26,6 +26,11 @@ func (conn *Transport) Connect(conf *Config) error {
 		conn.GrpcConn, err = grpc.Dial(conf.Grpc, grpc.WithTransportCredentials(insecure.NewCredentials()))
 		conn.GrpcClient = pb.NewLogRpcClient(conn.GrpcConn)
 	}
+	if err != nil {
+		conn.Conn = nil
+		conn.GrpcConn = nil
+		conn.GrpcClient = nil
+	}
 	conn.Config = conf
 	return err
 }
@@ -33,8 +38,10 @@ func (conn *Transport) Connect(conf *Config) error {
 func (conn *Transport) Close() error {
 	if conn.GrpcConn != nil {
 		return conn.GrpcConn.Close()
-	} else {
+	} else if conn.Conn != nil {
 		return conn.Conn.Close()
+	} else {
+		return nil
 	}
 }
 
