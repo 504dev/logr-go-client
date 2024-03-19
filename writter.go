@@ -11,7 +11,7 @@ type Writer struct {
 
 func (w *Writer) Write(b []byte) (int, error) {
 	log := w.blankLog()
-	log.Level = LevelInfo
+	log.Level = types.LevelInfo
 	log.Message = string(b)
 
 	if w.Transform != nil {

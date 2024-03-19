@@ -29,8 +29,9 @@ func (c *Config) NewLogger(logname string) (*Logger, error) {
 		Logname: logname,
 		Prefix:  "{time} {level} ",
 		Body:    "[{version}, pid={pid}, {initiator}] {message}",
-		Level:   LevelDebug,
+		Level:   types.LevelDebug,
 		Console: true,
+		Levels:  Levels,
 	}
 	err := logger.Connect(c)
 	logger.Counter, _ = c.NewCounter(logname)
