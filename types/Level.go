@@ -15,6 +15,9 @@ const (
 
 type Level string
 
+func (lvl Level) String() string {
+	return string(lvl)
+}
 func (lvl Level) Weight() int {
 	return map[Level]int{
 		LevelEmerg:  7,
