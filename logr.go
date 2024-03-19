@@ -134,7 +134,7 @@ func (lg *Logger) InfoErr(err error, v ...interface{}) {
 	if err == nil {
 		lg.Log(types.LevelInfo, v...)
 	} else {
-		lg.Error(types.LevelInfo, v...)
+		lg.Log(types.LevelError, v...)
 	}
 }
 
