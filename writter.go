@@ -4,21 +4,21 @@ import (
 	"github.com/504dev/logr-go-client/types"
 )
 
-type Writter struct {
+type Writer struct {
 	*Logger
 	Transform func(log *Log)
 }
 
-func (w *Writter) Write(b []byte) (int, error) {
+func (w *Writer) Write(b []byte) (int, error) {
 	log := w.blankLog()
-	log.Level = LevelInfo
+	log.Level = types.LevelInfo
 	log.Message = string(b)
 
 	if w.Transform != nil {
 		w.Transform(&Log{Log: log})
 	}
 
-	return w.writeLog(log)
+	return w.PushLog(log)
 }
 
 type Log struct {

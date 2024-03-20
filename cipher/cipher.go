@@ -6,33 +6,27 @@ import (
 	"crypto/rand"
 	"crypto/sha256"
 	"encoding/base64"
-	"encoding/json"
 	"errors"
+	gojson "github.com/goccy/go-json"
 	"io"
 )
 
-func EncryptAesJson(data interface{}, priv string) (string, error) {
-	privateKeyBytes, _ := base64.StdEncoding.DecodeString(priv)
-	jsonMsg, err := json.Marshal(data)
+func EncryptAesJson(data interface{}, priv string) ([]byte, error) {
+	privBytes, _ := base64.StdEncoding.DecodeString(priv)
+	jsonMsg, err := gojson.Marshal(data)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
-	cipherBytes, err := EncryptAes(jsonMsg, privateKeyBytes)
-	if err != nil {
-		return "", err
-	}
-	cipherText := base64.StdEncoding.EncodeToString(cipherBytes)
-	return cipherText, err
+	return EncryptAes(jsonMsg, privBytes)
 }
 
-func DecodeAesJson(cipherText string, priv string, dest interface{}) error {
-	priv64, _ := base64.StdEncoding.DecodeString(priv)
-	cipher64, _ := base64.StdEncoding.DecodeString(cipherText)
-	text, err := DecryptAes(cipher64, priv64)
+func DecodeAesJson(cipherBytes []byte, priv string, dest interface{}) error {
+	privBytes, _ := base64.StdEncoding.DecodeString(priv)
+	text, err := DecryptAes(cipherBytes, privBytes)
 	if err != nil {
 		return err
 	}
-	err = json.Unmarshal(text, dest)
+	err = gojson.Unmarshal(text, dest)
 	if err != nil {
 		return err
 	}
@@ -54,6 +48,21 @@ func EncryptAes(plainText []byte, key []byte) ([]byte, error) {
 		return nil, err
 	}
 
+	stream := cipher.NewCFBEncrypter(block, iv)
+	stream.XORKeyStream(cipherText[aes.BlockSize:], plainText)
+
+	return cipherText, err
+}
+
+func EncryptAesIv(plainText []byte, key []byte, iv []byte) ([]byte, error) {
+	hash := sha256.Sum256(key)
+	block, err := aes.NewCipher(hash[:])
+	if err != nil {
+		return nil, err
+	}
+	salt := sha256.Sum256(iv)
+	iv = salt[:aes.BlockSize]
+	cipherText := append(iv, make([]byte, len(plainText))...)
 	stream := cipher.NewCFBEncrypter(block, iv)
 	stream.XORKeyStream(cipherText[aes.BlockSize:], plainText)
 

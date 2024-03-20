@@ -1,7 +1,6 @@
 package types
 
 import (
-	"fmt"
 	"github.com/504dev/logr-go-client/cipher"
 	"sync"
 	"time"
@@ -12,9 +11,9 @@ type Count struct {
 	DashId    int    `db:"dash_id"   json:"dash_id,omitempty"`
 	Timestamp int64  `db:"timestamp" json:"timestamp"`
 	Hostname  string `db:"hostname"  json:"hostname,omitempty"`
+	Version   string `db:"version"   json:"version,omitempty"`
 	Logname   string `db:"logname"   json:"logname,omitempty"`
 	Keyname   string `db:"keyname"   json:"keyname"`
-	Version   string `db:"version"   json:"version,omitempty"`
 	Metrics   `json:"metrics"`
 }
 
@@ -27,6 +26,7 @@ type Metrics struct {
 	*Time
 }
 
+// for logr usage
 func (m Metrics) ToMap() map[string]interface{} {
 	res := map[string]interface{}{}
 	if m.Inc != nil {
@@ -50,55 +50,16 @@ func (m Metrics) ToMap() map[string]interface{} {
 	return res
 }
 
-func (c *Count) Decrypt(cipherText string, priv string) error {
+func (c *Count) Decrypt(cipherData []byte, priv string) error {
 	c.RLock()
 	defer c.RUnlock()
-	return cipher.DecodeAesJson(cipherText, priv, c)
+	return cipher.DecodeAesJson(cipherData, priv, c)
 }
 
-func (c *Count) Encrypt(priv string) (string, error) {
+func (c *Count) Encrypt(priv string) ([]byte, error) {
 	c.RLock()
 	defer c.RUnlock()
 	return cipher.EncryptAesJson(c, priv)
-}
-
-func (c *Count) AsVector() []interface{} {
-	c.RLock()
-	defer c.RUnlock()
-	dt := time.Unix(c.Timestamp, 0).UTC()
-	day := dt.Format("2006-01-02")
-	values := []interface{}{day, dt, c.DashId, c.Hostname, c.Logname, c.Keyname, c.Version}
-	if c.Metrics.Inc == nil {
-		values = append(values, nil)
-	} else {
-		values = append(values, c.Metrics.Inc.Val)
-	}
-	if c.Metrics.Max == nil {
-		values = append(values, nil)
-	} else {
-		values = append(values, c.Metrics.Max.Val)
-	}
-	if c.Metrics.Min == nil {
-		values = append(values, nil)
-	} else {
-		values = append(values, c.Metrics.Min.Val)
-	}
-	if c.Metrics.Avg == nil {
-		values = append(values, nil, nil)
-	} else {
-		values = append(values, c.Metrics.Avg.Sum, c.Metrics.Avg.Num)
-	}
-	if c.Metrics.Per == nil {
-		values = append(values, nil, nil)
-	} else {
-		values = append(values, c.Metrics.Per.Taken, c.Metrics.Per.Total)
-	}
-	if c.Metrics.Time == nil {
-		values = append(values, nil)
-	} else {
-		values = append(values, c.Metrics.Time.Duration)
-	}
-	return values
 }
 
 func (c *Count) now() {
@@ -111,7 +72,18 @@ func (c *Count) Inc(num float64) *Count {
 	if c.Metrics.Inc == nil {
 		c.Metrics.Inc = &Inc{}
 	}
-	c.Metrics.Inc.Val += num
+	c.Metrics.Inc.Val += num - c.Metrics.Inc.Last
+	c.now()
+	return c
+}
+
+func (c *Count) IncLast(num float64) *Count {
+	c.Lock()
+	defer c.Unlock()
+	if c.Metrics.Inc == nil {
+		c.Metrics.Inc = &Inc{}
+	}
+	c.Metrics.Inc.Last = num
 	c.now()
 	return c
 }
@@ -170,7 +142,7 @@ func (c *Count) Time(duration time.Duration) func() time.Duration {
 	if c.Metrics.Time == nil {
 		c.Metrics.Time = &Time{}
 	}
-	c.Metrics.Time.Duration += duration.Nanoseconds()
+	c.Metrics.Time.Duration = duration.Nanoseconds()
 	c.now()
 	ts := time.Now()
 	var delta *time.Duration
@@ -185,36 +157,9 @@ func (c *Count) Time(duration time.Duration) func() time.Duration {
 	}
 }
 
-type Counts []*Count
-
-type Serie struct {
-	Hostname string           `json:"hostname"`
-	Keyname  string           `json:"keyname"`
-	Kind     string           `json:"kind"`
-	Data     [][2]interface{} `json:"data"`
-}
-type Series []*Serie
-
-func (cs Counts) Format() Series {
-	m := map[string]*Serie{}
-	for _, c := range cs {
-		for k, v := range c.ToMap() {
-			key := fmt.Sprintf("%v:%v:%v", k, c.Keyname, c.Hostname)
-			if _, ok := m[key]; !ok {
-				m[key] = &Serie{Hostname: c.Hostname, Keyname: c.Keyname, Kind: k}
-			}
-			m[key].Data = append(m[key].Data, [2]interface{}{c.Timestamp, v})
-		}
-	}
-	res := make(Series, 0, len(m))
-	for _, s := range m {
-		res = append(res, s)
-	}
-	return res
-}
-
 type Inc struct {
-	Val float64 `db:"inc,omitempty" json:"inc,omitempty"`
+	Val  float64 `db:"inc,omitempty" json:"inc,omitempty"`
+	Last float64 `db:"-" json:"-"`
 }
 
 type Max struct {

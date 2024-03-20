@@ -1,0 +1,76 @@
+syntax = "proto3";
+
+package logr;
+
+option go_package = "kozhurkin.logrpc.v1;logrpcv1";
+
+service LogRpc {
+  rpc Push (LogRpcPackage) returns (Response);
+}
+
+message LogRpcPackage {
+  uint32 dash_id = 1;
+  string public_key = 2;
+  bytes cipher_log = 3;
+  bytes cipher_count = 4;
+  bytes plain_log = 5;
+  Log log = 6;
+  Count count = 7;
+  Chunk chunk = 8;
+  string sig = 9;
+  message Log {
+    uint32 dash_id = 1;
+    int64 timestamp = 2;
+    string logname = 3;
+    string hostname = 4;
+    string version = 5;
+    string level = 6;
+    string message = 7;
+    string initiator = 8;
+    uint32 pid = 9;
+  }
+  message Count {
+    uint32 dash_id = 1;
+    int64 timestamp = 2;
+    string logname = 3;
+    string hostname = 4;
+    string version = 5;
+    string keyname = 6;
+    Inc inc = 7;
+    Max max = 8;
+    Min min = 9;
+    Avg avg = 10;
+    Per per = 11;
+    Time time = 12;
+    message Inc {
+      double inc = 1;
+    }
+    message Max {
+      double max = 1;
+    }
+    message Min {
+      double min = 1;
+    }
+    message Avg {
+      double sum = 1;
+      uint32 num = 2;
+    }
+    message Per {
+      double taken = 1;
+      double total = 2;
+    }
+    message Time {
+      int64 duration = 1;
+    }
+  }
+  message Chunk {
+    string uid = 1;
+    int64 ts = 2;
+    uint32 i = 3;
+    uint32 n = 4;
+  }
+}
+
+message Response {
+  //
+}
