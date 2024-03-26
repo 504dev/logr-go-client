@@ -37,11 +37,11 @@ func (ch *ChunkInfo) CalcSig(privBase64 string) (signatureBase64 string, err err
 }
 
 type LogPackage struct {
-	DashId      int    `json:"dash_id,omitempty"`
-	PublicKey   string `json:"public_key"`
-	CipherLog   []byte `json:"cipher_log,omitempty"`
-	CipherCount []byte `json:"cipher_count,omitempty"`
-	PlainLog    []byte `json:"_log,omitempty"`
+	DashId      int                    `json:"dash_id,omitempty"`
+	PublicKey   string                 `json:"public_key"`
+	CipherLog   []byte                 `json:"cipher_log,omitempty"`
+	CipherCount []byte                 `json:"cipher_count,omitempty"`
+	PlainLog    []byte                 `json:"_log,omitempty"`
 	*Log        `json:"log,omitempty"` // field do not support long messages over udp
 	*Count      `json:"count,omitempty"`
 	Sig         string     `json:"sig,omitempty"`
