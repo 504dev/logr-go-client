@@ -45,16 +45,13 @@ func (conn *Transport) Close() error {
 	}
 }
 
-func (conn *Transport) pushGrpc(lp *types.LogPackage) (int, error) {
+func (conn *Transport) pushGrpc(lp *types.LogPackage) error {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
 	//fmt.Println(string(lp.ProtoBytes()), len(lp.ProtoBytes()))
 	req := lp.Proto()
 	_, err := conn.GrpcClient.Push(ctx, req)
-	if err != nil {
-		return 0, err
-	}
-	return 1, nil
+	return err
 }
 
 func (conn *Transport) PushLog(log *types.Log) (int, error) {
@@ -76,7 +73,7 @@ func (conn *Transport) PushLog(log *types.Log) (int, error) {
 	}
 
 	if conn.GrpcConn != nil {
-		return conn.pushGrpc(&lp)
+		return 1, conn.pushGrpc(&lp)
 	}
 
 	if conn.Config.NoCipher == true {
@@ -120,7 +117,7 @@ func (conn *Transport) PushCount(count *types.Count) (int, error) {
 	}
 
 	if conn.GrpcConn != nil {
-		return conn.pushGrpc(&lp)
+		return 0, conn.pushGrpc(&lp)
 	}
 
 	msg, err := gojson.Marshal(lp)
