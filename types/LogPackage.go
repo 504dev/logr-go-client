@@ -106,7 +106,7 @@ func (lp *LogPackage) DecryptCount(priv string) error {
 	return nil
 }
 
-func (lp *LogPackage) Chunkify(n int, priv string) ([][]byte, error) {
+func (lp *LogPackage) Chunkify(n int, priv string) (LogPackageChunks, error) {
 	uid := helpers.RandString(6)
 	err := lp.Sign(uid, 0, 1, priv)
 	if err != nil {
@@ -119,7 +119,7 @@ func (lp *LogPackage) Chunkify(n int, priv string) ([][]byte, error) {
 	}
 
 	if len(msg) <= n {
-		return [][]byte{msg}, err
+		return LogPackageChunks{lp}, err
 	}
 
 	var data []byte
@@ -132,7 +132,7 @@ func (lp *LogPackage) Chunkify(n int, priv string) ([][]byte, error) {
 	headSize := len(msg) - logSize
 	chunkSize := int(float32(n-headSize) * 0.749)
 	chunks := helpers.ChunkifyBytes(data, chunkSize)
-	result := make([][]byte, len(chunks))
+	result := make(LogPackageChunks, len(chunks))
 
 	for i, chunk := range chunks {
 		lpi := *lp
@@ -148,10 +148,7 @@ func (lp *LogPackage) Chunkify(n int, priv string) ([][]byte, error) {
 			lpi.PlainLog = chunk
 		}
 
-		result[i], err = gojson.Marshal(lpi)
-		if err != nil {
-			return nil, err
-		}
+		result[i] = &lpi
 	}
 
 	return result, nil
