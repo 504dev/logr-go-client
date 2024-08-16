@@ -18,72 +18,72 @@ type Transport struct {
 	GrpcClient pb.LogRpcClient
 }
 
-func (conn *Transport) Connect(conf *Config) error {
+func (tp *Transport) Connect(conf *Config) error {
 	var err error
 	if conf.Udp != "" {
-		conn.Conn, err = net.Dial("udp", conf.Udp)
+		tp.Conn, err = net.Dial("udp", conf.Udp)
 	} else {
-		conn.GrpcConn, err = grpc.Dial(conf.Grpc, grpc.WithTransportCredentials(insecure.NewCredentials()))
-		conn.GrpcClient = pb.NewLogRpcClient(conn.GrpcConn)
+		tp.GrpcConn, err = grpc.Dial(conf.Grpc, grpc.WithTransportCredentials(insecure.NewCredentials()))
+		tp.GrpcClient = pb.NewLogRpcClient(tp.GrpcConn)
 	}
 	if err != nil {
-		conn.Conn = nil
-		conn.GrpcConn = nil
-		conn.GrpcClient = nil
+		tp.Conn = nil
+		tp.GrpcConn = nil
+		tp.GrpcClient = nil
 	}
-	conn.Config = conf
+	tp.Config = conf
 	return err
 }
 
-func (conn *Transport) Close() error {
-	if conn.GrpcConn != nil {
-		return conn.GrpcConn.Close()
-	} else if conn.Conn != nil {
-		return conn.Conn.Close()
+func (tp *Transport) Close() error {
+	if tp.GrpcConn != nil {
+		return tp.GrpcConn.Close()
+	} else if tp.Conn != nil {
+		return tp.Conn.Close()
 	} else {
 		return nil
 	}
 }
 
-func (conn *Transport) pushGrpc(lp *types.LogPackage) error {
+func (tp *Transport) pushGrpc(lp *types.LogPackage) error {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
 	//fmt.Println(string(lp.ProtoBytes()), len(lp.ProtoBytes()))
 	req := lp.Proto()
-	_, err := conn.GrpcClient.Push(ctx, req)
+	_, err := tp.GrpcClient.Push(ctx, req)
 	return err
 }
 
-func (conn *Transport) PushLog(log *types.Log) (int, error) {
-	if conn.Conn == nil && conn.GrpcConn == nil {
+func (tp *Transport) PushLog(log *types.Log) (int, error) {
+	if tp.Conn == nil && tp.GrpcConn == nil {
 		return 0, nil
 	}
 
 	lp := types.LogPackage{
-		DashId:    conn.Config.DashId,
-		PublicKey: conn.Config.PublicKey,
+		DashId:    tp.Config.DashId,
+		PublicKey: tp.Config.PublicKey,
 		Log:       log,
 	}
 
-	if conn.Config.NoCipher == false {
-		err := lp.EncryptLog(conn.Config.PrivateKey)
+	if tp.Config.NoCipher == false {
+		err := lp.EncryptLog(tp.Config.PrivateKey)
 		if err != nil {
 			return 0, err
 		}
 	}
 
-	if conn.GrpcConn != nil {
-		return 1, conn.pushGrpc(&lp)
+	if tp.GrpcConn != nil {
+		return 1, tp.pushGrpc(&lp)
 	}
 
-	if conn.Config.NoCipher == true {
+	if tp.Config.NoCipher == true {
 		err := lp.SerializeLog()
 		if err != nil {
 			return 0, err
 		}
 	}
 
-	chunks, err := lp.Chunkify(MAX_MESSAGE_SIZE, conn.Config.PrivateKey)
+	chunks, err := lp.Chunkify(MAX_MESSAGE_SIZE, tp.Config.PrivateKey)
 	if err != nil {
 		return 0, err
 	}
@@ -94,7 +94,7 @@ func (conn *Transport) PushLog(log *types.Log) (int, error) {
 	}
 
 	for i, msg := range messages {
-		_, err = conn.Conn.Write(msg)
+		_, err = tp.Conn.Write(msg)
 		//fmt.Println(err, len(chunk))
 		if err != nil {
 			return i, err
@@ -104,32 +104,32 @@ func (conn *Transport) PushLog(log *types.Log) (int, error) {
 	return len(chunks), nil
 }
 
-func (conn *Transport) PushCount(count *types.Count) (int, error) {
-	if conn.Conn == nil && conn.GrpcConn == nil {
+func (tp *Transport) PushCount(count *types.Count) (int, error) {
+	if tp.Conn == nil && tp.GrpcConn == nil {
 		return 0, nil
 	}
 	lp := types.LogPackage{
-		DashId:    conn.Config.DashId,
-		PublicKey: conn.Config.PublicKey,
+		DashId:    tp.Config.DashId,
+		PublicKey: tp.Config.PublicKey,
 		Count:     count,
 	}
 
-	if !conn.Config.NoCipher {
-		err := lp.EncryptCount(conn.Config.PrivateKey)
+	if !tp.Config.NoCipher {
+		err := lp.EncryptCount(tp.Config.PrivateKey)
 		if err != nil {
 			return 0, err
 		}
 	}
 
-	if conn.GrpcConn != nil {
-		return 0, conn.pushGrpc(&lp)
+	if tp.GrpcConn != nil {
+		return 0, tp.pushGrpc(&lp)
 	}
 
 	msg, err := gojson.Marshal(lp)
 	if err != nil {
 		return 0, err
 	}
-	_, err = conn.Conn.Write(msg)
+	_, err = tp.Conn.Write(msg)
 	if err != nil {
 		return 0, err
 	}

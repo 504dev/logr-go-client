@@ -8,6 +8,9 @@ import (
 type LogPackageChunks []*LogPackage
 
 func (chunks LogPackageChunks) isComplete() bool {
+	if len(chunks) == 0 {
+		return false
+	}
 	for _, lp := range chunks {
 		if lp == nil {
 			return false

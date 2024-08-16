@@ -1,3 +1,5 @@
+[![logr-go-client status](https://github.com/504dev/logr-go-client/actions/workflows/tests.yml/badge.svg)](https://github.com/504dev/logr-go-client/actions)
+
 # logr-go-client
 
 [Logr] client library for Go.
