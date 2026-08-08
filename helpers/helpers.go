@@ -2,18 +2,30 @@ package helpers
 
 import (
 	"math/rand"
+	"sync"
 	"time"
 )
 
-var rnd = rand.New(rand.NewSource(time.Now().Unix()))
+// rnd is guarded by rndMu: rand.New returns a generator that is not safe for
+// concurrent use, unlike the top-level functions of math/rand. RandString is
+// called from LogPackage.Chunkify on every log record, and applications log
+// from several goroutines at once.
+var (
+	rndMu sync.Mutex
+	rnd   = rand.New(rand.NewSource(time.Now().Unix()))
+)
 
 const letterBytes = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
 func RandString(n int) string {
 	b := make([]byte, n)
+
+	rndMu.Lock()
 	for i := range b {
 		b[i] = letterBytes[rnd.Intn(len(letterBytes))]
 	}
+	rndMu.Unlock()
+
 	return string(b)
 }
 
